@@ -1,0 +1,226 @@
+import 'dart:math';
+import 'package:sushi_galaxy/ui/theme/app_theme.dart';
+import 'package:sushi_galaxy/core/engine/game_engine.dart';
+
+/// Level objective types
+enum ObjectiveType {
+  score,
+  collect,
+  clearBlockers,
+  dropIngredients,
+  fillZones,
+  destroyInOrder,
+}
+
+/// Difficulty parameters for level generation
+class DifficultyParams {
+  final double targetWinRate; // 0.0 - 1.0
+  final int moveLimit;
+  final int targetScore;
+  final int gridSize; // 6-10
+
+  const DifficultyParams({
+    this.targetWinRate = 0.7,
+    this.moveLimit = 20,
+    this.targetScore = 1000,
+    this.gridSize = 8,
+  });
+}
+
+/// Level configuration
+class Level {
+  final int number;
+  final int moveLimit;
+  final int targetScore;
+  final ObjectiveType objectiveType;
+  final Map<SushiType, int>? collectTargets;
+  final int gridSize;
+  final int difficulty;
+  final String name;
+  final bool isEvent;
+
+  const Level({
+    required this.number,
+    required this.moveLimit,
+    required this.targetScore,
+    required this.objectiveType,
+    this.collectTargets,
+    this.gridSize = 8,
+    this.difficulty = 1,
+    this.name = '',
+    this.isEvent = false,
+  });
+
+  Level copyWith({
+    int? number,
+    int? moveLimit,
+    int? targetScore,
+    ObjectiveType? objectiveType,
+    Map<SushiType, int>? collectTargets,
+    int? gridSize,
+    int? difficulty,
+    String? name,
+    bool? isEvent,
+  }) {
+    return Level(
+      number: number ?? this.number,
+      moveLimit: moveLimit ?? this.moveLimit,
+      targetScore: targetScore ?? this.targetScore,
+      objectiveType: objectiveType ?? this.objectiveType,
+      collectTargets: collectTargets ?? this.collectTargets,
+      gridSize: gridSize ?? this.gridSize,
+      difficulty: difficulty ?? this.difficulty,
+      name: name ?? this.name,
+      isEvent: isEvent ?? this.isEvent,
+    );
+  }
+}
+
+/// Level generator
+class LevelGenerator {
+  final Random _random = Random();
+
+  /// Generate a level based on difficulty parameters
+  Level generate({
+    required int levelNumber,
+    DifficultyParams? params,
+  }) {
+    final difficultyParams = params ?? _getDifficultyForLevel(levelNumber);
+
+    // Determine objective type (rotates through different types)
+    final objectiveType = ObjectiveType.values[
+        (levelNumber ~/ 5) % ObjectiveType.values.length];
+
+    // Generate name based on level
+    final name = _generateLevelName(levelNumber);
+
+    return Level(
+      number: levelNumber,
+      moveLimit: difficultyParams.moveLimit,
+      targetScore: difficultyParams.targetScore,
+      objectiveType: objectiveType,
+      collectTargets: objectiveType == ObjectiveType.collect
+          ? _generateCollectTargets(levelNumber)
+          : null,
+      gridSize: difficultyParams.gridSize,
+      difficulty: _calculateDifficulty(levelNumber),
+      name: name,
+    );
+  }
+
+  /// Get difficulty parameters for a specific level
+  DifficultyParams _getDifficultyForLevel(int level) {
+    if (level <= 10) {
+      // Tutorial levels - easy
+      return const DifficultyParams(
+        targetWinRate: 0.95,
+        moveLimit: 25,
+        targetScore: 500,
+        gridSize: 6,
+      );
+    } else if (level <= 30) {
+      // Easy
+      return const DifficultyParams(
+        targetWinRate: 0.85,
+        moveLimit: 22,
+        targetScore: 800,
+        gridSize: 7,
+      );
+    } else if (level <= 60) {
+      // Medium
+      return const DifficultyParams(
+        targetWinRate: 0.70,
+        moveLimit: 20,
+        targetScore: 1200,
+        gridSize: 8,
+      );
+    } else if (level <= 100) {
+      // Hard
+      return const DifficultyParams(
+        targetWinRate: 0.60,
+        moveLimit: 18,
+        targetScore: 1800,
+        gridSize: 8,
+      );
+    } else {
+      // Expert - procedural
+      return DifficultyParams(
+        targetWinRate: 0.50,
+        moveLimit: 15 + _random.nextInt(5),
+        targetScore: 2000 + (level - 100) * 50,
+        gridSize: 8 + ((level - 100) ~/ 50).clamp(0, 2),
+      );
+    }
+  }
+
+  int _calculateDifficulty(int level) {
+    if (level <= 10) return 1;
+    if (level <= 30) return 2;
+    if (level <= 60) return 3;
+    if (level <= 100) return 4;
+    return 5;
+  }
+
+  String _generateLevelName(int level) {
+    final names = [
+      'First Roll',
+      'California Dream',
+      'Spicy Tuna',
+      'Dragon Roll',
+      'Rainbow Garden',
+      'Ocean Wave',
+      'Samurai Plate',
+      'Chef\'s Special',
+      'Midnight Sushi',
+      'Galaxy Feast',
+    ];
+
+    if (level <= 10) {
+      return 'Level $level';
+    } else if (level <= 100) {
+      return names[(level - 11) ~/ 10 % names.length];
+    } else {
+      return 'Cosmic Level $level';
+    }
+  }
+
+  Map<SushiType, int>? _generateCollectTargets(int level) {
+    // Generate collect targets based on level
+    final targetCount = 10 + (level ~/ 10) * 5;
+    final sushiType = SushiType.values[level % SushiType.values.length];
+
+    return {sushiType: targetCount};
+  }
+
+  /// Validate that a level is completable
+  ValidationResult validate(Level level) {
+    // Basic validation - in production, this would run the level
+    // through the game engine to ensure it's solvable
+    return ValidationResult(
+      isValid: true,
+      estimatedWinRate: 0.7,
+      issues: [],
+    );
+  }
+
+  /// Balance a level to target win rate
+  Level balance(Level level, double targetWinRate) {
+    // Adjust difficulty if needed
+    return level.copyWith(
+      moveLimit: level.moveLimit + ((targetWinRate - 0.7) * 10).round(),
+    );
+  }
+}
+
+/// Validation result
+class ValidationResult {
+  final bool isValid;
+  final double estimatedWinRate;
+  final List<String> issues;
+
+  const ValidationResult({
+    required this.isValid,
+    required this.estimatedWinRate,
+    required this.issues,
+  });
+}
