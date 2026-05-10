@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:sushi_galaxy/core/store/game_providers.dart';
 import 'package:sushi_galaxy/ui/theme/app_theme.dart';
 import 'package:sushi_galaxy/ui/components/game_widgets.dart';
+import 'package:sushi_galaxy/ui/components/effects/cosmic_background.dart';
 import 'package:sushi_galaxy/ui/screens/game_screen.dart';
 import 'package:sushi_galaxy/ui/screens/home_screen.dart';
 
-/// Level Complete Screen
-class LevelCompleteScreen extends ConsumerWidget {
+/// Level Complete Screen with warm terracotta celebration theme
+class LevelCompleteScreen extends StatelessWidget {
   final int score;
   final int stars;
   final int level;
@@ -21,144 +20,203 @@ class LevelCompleteScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.deepSpaceBlue,
-              AppColors.cosmosDark,
-            ],
+      body: CosmicBackground(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.deepSpaceBlue,
+                AppColors.cosmosDark,
+              ],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                const Spacer(),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  const Spacer(),
 
-                // Celebration
-                const Text(
-                  '🎉',
-                  style: TextStyle(fontSize: 80),
-                ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
-                const SizedBox(height: 16),
-                const Text(
-                  'LEVEL COMPLETE!',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                  // Celebration emoji
+                  const Text(
+                    '🎉',
+                    style: TextStyle(fontSize: 80),
+                  ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
+
+                  const SizedBox(height: 16),
+
+                  // Title with warm gradient
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [
+                        AppColors.terracottaLight,
+                        AppColors.goldenRice,
+                      ],
+                    ).createShader(bounds),
+                    child: const Text(
+                      'LEVEL COMPLETE!',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 3,
+                      ),
+                    ),
+                  ).animate().fadeIn(delay: 300.ms),
+
+                  const SizedBox(height: 8),
+                  Text(
+                    'Level $level',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ).animate().fadeIn(delay: 300.ms),
-                const SizedBox(height: 8),
-                Text(
-                  'Level $level',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-                // Stars
-                StarRating(stars: stars),
+                  // Stars
+                  StarRating(stars: stars),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-                // Score
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.glassWhite,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'SCORE',
+                  // Score with warm glass effect
+                  Container(
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.glassWhite.withOpacity(0.2),
+                          AppColors.glassWhite.withOpacity(0.08),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: AppColors.goldenRice.withOpacity(0.4),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.goldenRice.withOpacity(0.15),
+                          blurRadius: 20,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'SCORE',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          '$score',
+                          style: const TextStyle(
+                            fontSize: 52,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.goldenRice,
+                            shadows: [
+                              Shadow(
+                                color: AppColors.goldenRice,
+                                blurRadius: 15,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate().fadeIn(delay: 600.ms).scale(begin: const Offset(0.8, 0.8)),
+
+                  const SizedBox(height: 24),
+
+                  // Rewards with terracotta theme
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.terracotta.withOpacity(0.25),
+                          AppColors.sakuraPink.withOpacity(0.15),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.terracotta.withOpacity(0.6)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.terracotta.withOpacity(0.15),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _RewardItem(icon: '⭐', value: '+${stars * 10}'),
+                        _RewardItem(icon: '💎', value: '+50'),
+                      ],
+                    ),
+                  ).animate().fadeIn(delay: 800.ms),
+
+                  const Spacer(),
+
+                  // Next Level button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const GameScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.terracotta,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        elevation: 8,
+                        shadowColor: AppColors.terracotta.withOpacity(0.5),
+                      ),
+                      child: const Text(
+                        'NEXT LEVEL',
                         style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '$score',
-                        style: const TextStyle(
-                          fontSize: 48,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.goldenRice,
+                          letterSpacing: 3,
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ).animate().fadeIn(delay: 600.ms).scale(begin: const Offset(0.8, 0.8)),
-
-                const SizedBox(height: 24),
-
-                // Rewards
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.neonPurple.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.neonPurple),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _RewardItem(icon: '⭐', value: '+${stars * 10}'),
-                      _RewardItem(icon: '💎', value: '+50'),
-                    ],
-                  ),
-                ).animate().fadeIn(delay: 800.ms),
-
-                const Spacer(),
-
-                // Buttons
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
+                  const SizedBox(height: 12),
+                  TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
+                      Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (_) => const GameScreen()),
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        (route) => false,
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.sakuraPink,
-                    ),
                     child: const Text(
-                      'NEXT LEVEL',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      'Back to Menu',
+                      style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HomeScreen()),
-                      (route) => false,
-                    );
-                  },
-                  child: const Text(
-                    'Back to Menu',
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -180,12 +238,12 @@ class _RewardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 20)),
-        const SizedBox(width: 4),
+        Text(icon, style: const TextStyle(fontSize: 22)),
+        const SizedBox(width: 6),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),

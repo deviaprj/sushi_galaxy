@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sushi_galaxy/core/engine/game_engine.dart';
 import 'package:sushi_galaxy/core/generators/level_generator.dart';
-import 'package:sushi_galaxy/ui/theme/app_theme.dart';
 
 // Game State
 enum GameState {

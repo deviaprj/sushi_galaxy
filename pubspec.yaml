@@ -18,6 +18,16 @@ dependencies:
 
   # UI & Animations
   flutter_animate: ^4.5.0
+  lottie: ^3.1.0
+  flutter_staggered_animations: ^1.1.1
+  simple_animations: ^5.0.2
+
+  # Graphics & Effects
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.10+1
+
+  # Audio
+  audioplayers: ^5.2.1
 
   # Utils
   uuid: ^4.4.2
@@ -38,6 +48,10 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/sushis/
+    - assets/images/effects/
     - assets/audio/sfx/
     - assets/audio/music/
     - assets/animations/
+    - assets/animations/victory/
+    - assets/animations/combo/

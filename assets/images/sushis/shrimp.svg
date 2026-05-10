@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="dropShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+      <feOffset dx="1" dy="2" result="offsetBlur"/>
+      <feFlood flood-color="#3E2723" flood-opacity="0.35"/>
+      <feComposite in2="offsetBlur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="neumorphic" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
+      <feOffset dx="-1" dy="-1" result="lightOffset"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.4"/>
+      <feComposite in2="lightOffset" operator="in" result="highlight"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="darkBlur"/>
+      <feOffset dx="1.5" dy="1.5" result="darkOffset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+      <feComposite in2="darkOffset" operator="in" result="innerShadow"/>
+      <feMerge>
+        <feMergeNode in="highlight"/>
+        <feMergeNode in="innerShadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Shrimp body gradient -->
+    <linearGradient id="shrimpGrad" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#FFAB91"/>
+      <stop offset="30%" stop-color="#FF8A65"/>
+      <stop offset="65%" stop-color="#F4511E"/>
+      <stop offset="100%" stop-color="#E64A19"/>
+    </linearGradient>
+    <!-- Shrimp highlight gradient -->
+    <linearGradient id="shrimpHighlight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFCCBC" stop-opacity="0.8"/>
+      <stop offset="40%" stop-color="#FFAB91" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FF8A65" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Rice gradient -->
+    <linearGradient id="riceGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#FFF8F0"/>
+      <stop offset="100%" stop-color="#E8DCC8"/>
+    </linearGradient>
+    <!-- Glossy highlight -->
+    <linearGradient id="glossShrimp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.65"/>
+      <stop offset="30%" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Radial glow -->
+    <radialGradient id="shrimpGlow" cx="0.38" cy="0.3" r="0.6">
+      <stop offset="0%" stop-color="#FFCCBC" stop-opacity="0.45"/>
+      <stop offset="50%" stop-color="#FF8A65" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#E64A19" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Rice specular -->
+    <radialGradient id="riceSpecular" cx="0.45" cy="0.3" r="0.55">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Tail gradient -->
+    <linearGradient id="tailGrad" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#FFCCBC"/>
+      <stop offset="50%" stop-color="#FF8A65"/>
+      <stop offset="100%" stop-color="#E64A19"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#dropShadow)">
+    <!-- Rice base -->
+    <rect x="8" y="42" width="48" height="14" rx="5" ry="5" fill="url(#riceGrad)" filter="url(#neumorphic)"/>
+    <rect x="8" y="42" width="48" height="7" rx="5" ry="4" fill="url(#riceSpecular)"/>
+    <!-- Rice texture dots -->
+    <circle cx="18" cy="49" r="1" fill="#E0D5C5" opacity="0.5"/>
+    <circle cx="28" cy="47" r="0.9" fill="#E0D5C5" opacity="0.4"/>
+    <circle cx="38" cy="50" r="1" fill="#E0D5C5" opacity="0.45"/>
+    <circle cx="45" cy="48" r="1" fill="#E0D5C5" opacity="0.5"/>
+    <circle cx="33" cy="51" r="0.8" fill="#E0D5C5" opacity="0.35"/>
+
+    <!-- Shrimp body - curved shape -->
+    <path d="M12 38 Q18 18 32 16 Q48 14 54 28 Q52 36 48 40 Q36 44 24 42 Q14 40 12 38Z" fill="url(#shrimpGrad)"/>
+    <!-- Radial glow -->
+    <path d="M12 38 Q18 18 32 16 Q48 14 54 28 Q52 36 48 40 Q36 44 24 42 Q14 40 12 38Z" fill="url(#shrimpGlow)"/>
+
+    <!-- Shrimp segment lines (curved body ridges) -->
+    <path d="M22 20 Q30 22 34 20" stroke="#BF360C" stroke-width="0.7" fill="none" opacity="0.25"/>
+    <path d="M28 24 Q36 26 40 23" stroke="#BF360C" stroke-width="0.6" fill="none" opacity="0.22"/>
+    <path d="M34 28 Q42 30 46 27" stroke="#BF360C" stroke-width="0.6" fill="none" opacity="0.2"/>
+    <path d="M38 32 Q44 34 48 31" stroke="#BF360C" stroke-width="0.5" fill="none" opacity="0.18"/>
+
+    <!-- Shrimp tail fan -->
+    <path d="M8 42 L14 34 L16 44Z" fill="url(#tailGrad)" opacity="0.9"/>
+    <path d="M6 40 L12 32 L14 42Z" fill="#FFAB91" opacity="0.6"/>
+
+    <!-- Glossy highlight -->
+    <path d="M18 22 Q26 18 38 18 Q46 18 50 26 Q40 22 28 22 Q22 22 18 24Z" fill="url(#glossShrimp)"/>
+
+    <!-- Glass-like specular -->
+    <ellipse cx="30" cy="22" rx="6" ry="2.5" fill="#ffffff" opacity="0.4"/>
+    <ellipse cx="30" cy="22" rx="3.5" ry="1.3" fill="#ffffff" opacity="0.2"/>
+
+    <!-- Edge shadow where shrimp meets rice -->
+    <path d="M14 40 Q24 44 36 44 Q46 42 50 38" stroke="#BF360C" stroke-width="0.6" fill="none" opacity="0.15"/>
+  </g>
+</svg>

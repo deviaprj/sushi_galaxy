@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="dropShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+      <feOffset dx="1" dy="2" result="offsetBlur"/>
+      <feFlood flood-color="#3E2723" flood-opacity="0.3"/>
+      <feComposite in2="offsetBlur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="neumorphic" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
+      <feOffset dx="-1" dy="-1" result="lightOffset"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.45"/>
+      <feComposite in2="lightOffset" operator="in" result="highlight"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="darkBlur"/>
+      <feOffset dx="1.5" dy="1.5" result="darkOffset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.18"/>
+      <feComposite in2="darkOffset" operator="in" result="innerShadow"/>
+      <feMerge>
+        <feMergeNode in="highlight"/>
+        <feMergeNode in="innerShadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Tamago body gradient -->
+    <linearGradient id="tamagoGrad" x1="0" y1="0" x2="0.1" y2="1">
+      <stop offset="0%" stop-color="#FFF176"/>
+      <stop offset="25%" stop-color="#FFD54F"/>
+      <stop offset="60%" stop-color="#FFB300"/>
+      <stop offset="100%" stop-color="#F9A825"/>
+    </linearGradient>
+    <!-- Rice gradient -->
+    <linearGradient id="riceGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#FFF8F0"/>
+      <stop offset="100%" stop-color="#E8DCC8"/>
+    </linearGradient>
+    <!-- Glossy highlight -->
+    <linearGradient id="glossTamago" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="25%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Radial glow -->
+    <radialGradient id="tamagoGlow" cx="0.4" cy="0.25" r="0.65">
+      <stop offset="0%" stop-color="#FFF9C4" stop-opacity="0.5"/>
+      <stop offset="45%" stop-color="#FFD54F" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#FFB300" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Rice specular -->
+    <radialGradient id="riceSpecular" cx="0.45" cy="0.3" r="0.55">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Yolk center -->
+    <radialGradient id="yolkCenter" cx="0.5" cy="0.45" r="0.5">
+      <stop offset="0%" stop-color="#FF8F00" stop-opacity="0.3"/>
+      <stop offset="60%" stop-color="#FFB300" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FFB300" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g filter="url(#dropShadow)">
+    <!-- Rice base -->
+    <rect x="8" y="42" width="48" height="14" rx="5" ry="5" fill="url(#riceGrad)" filter="url(#neumorphic)"/>
+    <rect x="8" y="42" width="48" height="7" rx="5" ry="4" fill="url(#riceSpecular)"/>
+    <!-- Rice texture dots -->
+    <circle cx="18" cy="49" r="1" fill="#E0D5C5" opacity="0.5"/>
+    <circle cx="28" cy="47" r="0.9" fill="#E0D5C5" opacity="0.4"/>
+    <circle cx="38" cy="50" r="1" fill="#E0D5C5" opacity="0.45"/>
+    <circle cx="45" cy="48" r="1" fill="#E0D5C5" opacity="0.5"/>
+    <circle cx="23" cy="51" r="0.8" fill="#E0D5C5" opacity="0.35"/>
+
+    <!-- Tamago (egg omelette) rectangular shape -->
+    <rect x="10" y="14" width="44" height="30" rx="4" ry="4" fill="url(#tamagoGrad)"/>
+    <!-- Radial glow overlay -->
+    <rect x="10" y="14" width="44" height="30" rx="4" ry="4" fill="url(#tamagoGlow)"/>
+    <!-- Yolk center glow -->
+    <rect x="10" y="14" width="44" height="30" rx="4" ry="4" fill="url(#yolkCenter)"/>
+
+    <!-- Tamago cooked layer lines -->
+    <path d="M14 22 Q32 20 50 22" stroke="#FF8F00" stroke-width="0.5" fill="none" opacity="0.2"/>
+    <path d="M14 28 Q32 26 50 28" stroke="#FF8F00" stroke-width="0.5" fill="none" opacity="0.18"/>
+    <path d="M14 34 Q32 32 50 34" stroke="#FF8F00" stroke-width="0.4" fill="none" opacity="0.15"/>
+
+    <!-- Nori wrap strip -->
+    <rect x="10" y="38" width="44" height="5" rx="1" ry="1" fill="#1B5E20" opacity="0.85"/>
+    <rect x="10" y="38" width="44" height="2.5" rx="1" ry="1" fill="#2E7D32" opacity="0.4"/>
+
+    <!-- Glossy highlight band -->
+    <rect x="12" y="15" width="40" height="13" rx="3" ry="3" fill="url(#glossTamago)"/>
+
+    <!-- Glass-like specular highlights -->
+    <ellipse cx="24" cy="20" rx="5" ry="2.5" fill="#ffffff" opacity="0.42"/>
+    <ellipse cx="24" cy="20" rx="3" ry="1.3" fill="#ffffff" opacity="0.2"/>
+
+    <!-- Bottom edge shadow where tamago meets rice -->
+    <line x1="14" y1="43" x2="50" y2="43" stroke="#E65100" stroke-width="0.5" opacity="0.12"/>
+  </g>
+</svg>

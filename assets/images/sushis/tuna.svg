@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="dropShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+      <feOffset dx="1" dy="2" result="offsetBlur"/>
+      <feFlood flood-color="#1A0000" flood-opacity="0.4"/>
+      <feComposite in2="offsetBlur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="neumorphic" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
+      <feOffset dx="-1" dy="-1" result="lightOffset"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.4"/>
+      <feComposite in2="lightOffset" operator="in" result="highlight"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="darkBlur"/>
+      <feOffset dx="1.5" dy="1.5" result="darkOffset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+      <feComposite in2="darkOffset" operator="in" result="innerShadow"/>
+      <feMerge>
+        <feMergeNode in="highlight"/>
+        <feMergeNode in="innerShadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Tuna body gradient -->
+    <linearGradient id="tunaGrad" x1="0" y1="0" x2="0.1" y2="1">
+      <stop offset="0%" stop-color="#EF5350"/>
+      <stop offset="30%" stop-color="#E53935"/>
+      <stop offset="70%" stop-color="#C62828"/>
+      <stop offset="100%" stop-color="#B71C1C"/>
+    </linearGradient>
+    <!-- Rice gradient -->
+    <linearGradient id="riceGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#FFF8F0"/>
+      <stop offset="100%" stop-color="#E8DCC8"/>
+    </linearGradient>
+    <!-- Glossy highlight -->
+    <linearGradient id="glossTuna" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="25%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Radial glow -->
+    <radialGradient id="tunaGlow" cx="0.42" cy="0.28" r="0.65">
+      <stop offset="0%" stop-color="#FF8A80" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#E53935" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#C62828" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Rice specular -->
+    <radialGradient id="riceSpecular" cx="0.45" cy="0.3" r="0.55">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g filter="url(#dropShadow)">
+    <!-- Rice base -->
+    <rect x="8" y="42" width="48" height="14" rx="5" ry="5" fill="url(#riceGrad)" filter="url(#neumorphic)"/>
+    <rect x="8" y="42" width="48" height="7" rx="5" ry="4" fill="url(#riceSpecular)"/>
+    <!-- Rice texture dots -->
+    <circle cx="18" cy="49" r="1" fill="#E0D5C5" opacity="0.5"/>
+    <circle cx="28" cy="47" r="0.9" fill="#E0D5C5" opacity="0.4"/>
+    <circle cx="38" cy="50" r="1" fill="#E0D5C5" opacity="0.45"/>
+    <circle cx="23" cy="52" r="0.8" fill="#E0D5C5" opacity="0.35"/>
+    <circle cx="45" cy="48" r="1" fill="#E0D5C5" opacity="0.5"/>
+
+    <!-- Tuna topping -->
+    <rect x="8" y="14" width="48" height="30" rx="6" ry="6" fill="url(#tunaGrad)"/>
+    <rect x="8" y="14" width="48" height="30" rx="6" ry="6" fill="url(#tunaGlow)"/>
+
+    <!-- Tuna flesh - darker muscle fiber lines -->
+    <path d="M12 22 Q32 19 52 22" stroke="#880E4F" stroke-width="0.6" fill="none" opacity="0.25"/>
+    <path d="M12 26 Q32 24 52 26" stroke="#880E4F" stroke-width="0.5" fill="none" opacity="0.2"/>
+    <path d="M12 30 Q32 29 52 30" stroke="#880E4F" stroke-width="0.5" fill="none" opacity="0.18"/>
+    <path d="M12 34 Q32 33 52 34" stroke="#880E4F" stroke-width="0.4" fill="none" opacity="0.12"/>
+
+    <!-- Tuna white fat veins -->
+    <path d="M16 24 Q24 23 32 25 Q40 27 48 24" stroke="#FFCDD2" stroke-width="0.5" fill="none" opacity="0.35"/>
+    <path d="M14 31 Q24 30 32 32 Q42 34 50 30" stroke="#FFCDD2" stroke-width="0.4" fill="none" opacity="0.25"/>
+
+    <!-- Glossy highlight band -->
+    <rect x="10" y="15" width="44" height="14" rx="5" ry="4" fill="url(#glossTuna)"/>
+
+    <!-- Glass-like specular highlights -->
+    <ellipse cx="22" cy="20" rx="5" ry="2.8" fill="#ffffff" opacity="0.45"/>
+    <ellipse cx="22" cy="20" rx="3" ry="1.5" fill="#ffffff" opacity="0.22"/>
+
+    <!-- Bottom edge shadow -->
+    <line x1="14" y1="43" x2="50" y2="43" stroke="#7f0000" stroke-width="0.6" opacity="0.15"/>
+  </g>
+</svg>

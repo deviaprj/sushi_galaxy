@@ -3,11 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:sushi_galaxy/core/store/game_providers.dart';
 import 'package:sushi_galaxy/ui/theme/app_theme.dart';
-import 'package:sushi_galaxy/ui/components/game_widgets.dart';
 import 'package:sushi_galaxy/ui/screens/game_screen.dart';
-import 'package:sushi_galaxy/ui/screens/home_screen.dart';
 
-/// Level selection screen with scrollable world map
+/// Level selection screen with warm terracotta theme
 class LevelSelectScreen extends ConsumerWidget {
   const LevelSelectScreen({super.key});
 
@@ -17,16 +15,16 @@ class LevelSelectScreen extends ConsumerWidget {
 
     return Scaffold(
       body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.deepSpaceBlue,
-                AppColors.cosmosDark,
-              ],
-            ),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.deepSpaceBlue,
+              AppColors.cosmosDark,
+            ],
           ),
+        ),
         child: SafeArea(
           child: Column(
             children: [
@@ -47,10 +45,10 @@ class LevelSelectScreen extends ConsumerWidget {
                         'SELECT LEVEL',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
-                          letterSpacing: 2,
+                          letterSpacing: 3,
                         ),
                       ),
                     ),
@@ -59,17 +57,27 @@ class LevelSelectScreen extends ConsumerWidget {
                 ),
               ),
 
-              // Stats bar
+              // Stats bar with warm glass effect
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: 18,
+                    vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.glassWhite,
-                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.glassWhite.withOpacity(0.2),
+                        AppColors.glassWhite.withOpacity(0.08),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.terracotta.withOpacity(0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -106,7 +114,6 @@ class LevelSelectScreen extends ConsumerWidget {
                       isCompleted: isCompleted,
                       onTap: isUnlocked
                           ? () {
-                              // Start level directly
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -142,12 +149,12 @@ class _StatChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 18)),
-        const SizedBox(width: 4),
+        Text(icon, style: const TextStyle(fontSize: 20)),
+        const SizedBox(width: 6),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),
@@ -183,24 +190,36 @@ class _LevelTile extends StatelessWidget {
                   colors: isCompleted
                       ? [
                           AppColors.goldenRice.withOpacity(0.5),
-                          AppColors.goldenRice.withOpacity(0.3),
+                          AppColors.goldenRice.withOpacity(0.25),
                         ]
                       : [
-                          AppColors.sakuraPink.withOpacity(0.5),
-                          AppColors.sakuraPink.withOpacity(0.3),
+                          AppColors.terracotta.withOpacity(0.5),
+                          AppColors.terracotta.withOpacity(0.25),
                         ],
                 )
               : null,
-          color: isUnlocked ? null : AppColors.textSecondary.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
+          color: isUnlocked ? null : AppColors.textSecondary.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isUnlocked
                 ? (isCompleted
                     ? AppColors.goldenRice
-                    : AppColors.sakuraPink)
-                : AppColors.textSecondary.withOpacity(0.3),
+                    : AppColors.terracotta)
+                : AppColors.textSecondary.withOpacity(0.25),
             width: 2,
           ),
+          boxShadow: isUnlocked
+              ? [
+                  BoxShadow(
+                    color: (isCompleted
+                            ? AppColors.goldenRice
+                            : AppColors.terracotta)
+                        .withOpacity(0.2),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
         child: Center(
           child: isUnlocked
@@ -210,7 +229,7 @@ class _LevelTile extends StatelessWidget {
                     Text(
                       '$level',
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -226,7 +245,7 @@ class _LevelTile extends StatelessWidget {
               : Icon(
                   Icons.lock,
                   size: 20,
-                  color: AppColors.textSecondary.withOpacity(0.5),
+                  color: AppColors.textSecondary.withOpacity(0.4),
                 ),
         ),
       ),
@@ -248,16 +267,16 @@ class WorldMapScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.deepSpaceBlue,
-                AppColors.cosmosDark,
-              ],
-            ),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.deepSpaceBlue,
+              AppColors.cosmosDark,
+            ],
           ),
+        ),
         child: SafeArea(
           child: Column(
             children: [
@@ -278,10 +297,10 @@ class WorldMapScreen extends StatelessWidget {
                         'WORLDS',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
-                          letterSpacing: 2,
+                          letterSpacing: 3,
                         ),
                       ),
                     ),
@@ -350,47 +369,73 @@ class _WorldCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
           gradient: isUnlocked
               ? LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppColors.neonPurple.withOpacity(0.4),
-                    AppColors.cosmosDark,
+                    AppColors.terracotta.withOpacity(0.35),
+                    AppColors.cosmosDark.withOpacity(0.8),
                   ],
                 )
               : null,
-          color: isUnlocked ? null : AppColors.textSecondary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
+          color: isUnlocked ? null : AppColors.textSecondary.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isUnlocked
-                ? AppColors.neonPurple
+                ? AppColors.terracotta
                 : AppColors.textSecondary.withOpacity(0.2),
             width: 2,
           ),
+          boxShadow: isUnlocked
+              ? [
+                  BoxShadow(
+                    color: AppColors.terracotta.withOpacity(0.15),
+                    blurRadius: 15,
+                    spreadRadius: 3,
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           children: [
-            // Icon
+            // Icon with warm glow
             Container(
-              width: 70,
-              height: 70,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: isUnlocked
-                    ? AppColors.neonPurple.withOpacity(0.3)
-                    : AppColors.textSecondary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                gradient: isUnlocked
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.terracotta.withOpacity(0.4),
+                          AppColors.nebulaPurple.withOpacity(0.3),
+                        ],
+                      )
+                    : null,
+                color: isUnlocked ? null : AppColors.textSecondary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: isUnlocked
+                    ? [
+                        BoxShadow(
+                          color: AppColors.terracotta.withOpacity(0.2),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ]
+                    : null,
               ),
               child: Center(
                 child: Text(
                   icon,
-                  style: const TextStyle(fontSize: 36),
+                  style: const TextStyle(fontSize: 38),
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 18),
             // Info
             Expanded(
               child: Column(
@@ -399,7 +444,7 @@ class _WorldCard extends StatelessWidget {
                   Text(
                     name,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: isUnlocked
                           ? AppColors.textPrimary
@@ -421,9 +466,9 @@ class _WorldCard extends StatelessWidget {
             Icon(
               isUnlocked ? Icons.arrow_forward_ios : Icons.lock,
               color: isUnlocked
-                  ? AppColors.sakuraPink
+                  ? AppColors.terracotta
                   : AppColors.textSecondary,
-              size: 20,
+              size: 22,
             ),
           ],
         ),

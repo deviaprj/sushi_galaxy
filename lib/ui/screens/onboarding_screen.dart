@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:sushi_galaxy/core/store/game_providers.dart';
 import 'package:sushi_galaxy/ui/theme/app_theme.dart';
-import 'package:sushi_galaxy/ui/screens/home_screen.dart';
 
 /// Onboarding screen for first-time users
 class OnboardingScreen extends ConsumerStatefulWidget {

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Neigloo drop shadow -->
+    <filter id="dropShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+      <feOffset dx="1" dy="2" result="offsetBlur"/>
+      <feFlood flood-color="#3E2723" flood-opacity="0.35"/>
+      <feComposite in2="offsetBlur" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Neumorphic inner shadow -->
+    <filter id="neumorphic" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
+      <feOffset dx="-1" dy="-1" result="lightOffset"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.45"/>
+      <feComposite in2="lightOffset" operator="in" result="highlight"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="darkBlur"/>
+      <feOffset dx="1.5" dy="1.5" result="darkOffset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+      <feComposite in2="darkOffset" operator="in" result="innerShadow"/>
+      <feMerge>
+        <feMergeNode in="highlight"/>
+        <feMergeNode in="innerShadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Salmon body gradient -->
+    <linearGradient id="salmonGrad" x1="0" y1="0" x2="0.15" y2="1">
+      <stop offset="0%" stop-color="#FFAB91"/>
+      <stop offset="25%" stop-color="#FF7043"/>
+      <stop offset="70%" stop-color="#E64A19"/>
+      <stop offset="100%" stop-color="#D84315"/>
+    </linearGradient>
+    <!-- Rice gradient -->
+    <linearGradient id="riceGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#FFF8F0"/>
+      <stop offset="100%" stop-color="#E8DCC8"/>
+    </linearGradient>
+    <!-- Glossy highlight -->
+    <linearGradient id="glossSalmon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.65"/>
+      <stop offset="30%" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Radial glow -->
+    <radialGradient id="salmonGlow" cx="0.4" cy="0.25" r="0.6">
+      <stop offset="0%" stop-color="#FFCCBC" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#FF7043" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FF7043" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Rice specular -->
+    <radialGradient id="riceSpecular" cx="0.45" cy="0.3" r="0.55">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g filter="url(#dropShadow)">
+    <!-- Rice base -->
+    <rect x="8" y="42" width="48" height="14" rx="5" ry="5" fill="url(#riceGrad)" filter="url(#neumorphic)"/>
+    <!-- Rice specular highlight -->
+    <rect x="8" y="42" width="48" height="7" rx="5" ry="4" fill="url(#riceSpecular)"/>
+    <!-- Rice texture dots -->
+    <circle cx="18" cy="49" r="1" fill="#E0D5C5" opacity="0.5"/>
+    <circle cx="28" cy="47" r="0.9" fill="#E0D5C5" opacity="0.4"/>
+    <circle cx="38" cy="50" r="1" fill="#E0D5C5" opacity="0.45"/>
+    <circle cx="23" cy="52" r="0.8" fill="#E0D5C5" opacity="0.35"/>
+    <circle cx="45" cy="48" r="1" fill="#E0D5C5" opacity="0.5"/>
+    <circle cx="33" cy="51" r="0.9" fill="#E0D5C5" opacity="0.4"/>
+
+    <!-- Salmon topping -->
+    <rect x="8" y="14" width="48" height="30" rx="6" ry="6" fill="url(#salmonGrad)"/>
+    <!-- Radial glow overlay -->
+    <rect x="8" y="14" width="48" height="30" rx="6" ry="6" fill="url(#salmonGlow)"/>
+
+    <!-- Salmon flesh lines (fat striations) -->
+    <path d="M12 22 Q32 20 52 22" stroke="#BF360C" stroke-width="0.7" fill="none" opacity="0.3"/>
+    <path d="M12 26 Q32 24 52 26" stroke="#BF360C" stroke-width="0.6" fill="none" opacity="0.25"/>
+    <path d="M12 30 Q32 29 52 30" stroke="#BF360C" stroke-width="0.5" fill="none" opacity="0.2"/>
+    <path d="M12 34 Q32 33 52 34" stroke="#BF360C" stroke-width="0.5" fill="none" opacity="0.15"/>
+
+    <!-- Glossy highlight band -->
+    <rect x="10" y="15" width="44" height="13" rx="5" ry="4" fill="url(#glossSalmon)"/>
+
+    <!-- Glass-like specular arc -->
+    <ellipse cx="22" cy="20" rx="5" ry="2.8" fill="#ffffff" opacity="0.38"/>
+    <ellipse cx="22" cy="20" rx="3" ry="1.5" fill="#ffffff" opacity="0.2"/>
+
+    <!-- Bottom edge shadow line -->
+    <line x1="14" y1="43" x2="50" y2="43" stroke="#C62828" stroke-width="0.5" opacity="0.15"/>
+  </g>
+</svg>

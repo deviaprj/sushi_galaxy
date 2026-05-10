@@ -121,14 +121,16 @@ class Match {
   int get baseScore => type.score * length * comboMultiplier * typeMultiplier;
 }
 
-/// Grid configuration
+/// Grid configuration with difficulty control
 class GridConfig {
   final int rows;
   final int cols;
+  final int sushiTypeCount; // Fewer types = easier matches
 
   const GridConfig({
     this.rows = 8,
     this.cols = 8,
+    this.sushiTypeCount = 8,
   });
 }
 
@@ -170,25 +172,39 @@ class GameEngine {
 
   GridConfig get config => _config;
 
-  /// Initialize grid with random elements
+  /// Get active sushi types based on difficulty (fewer types = easier)
+  List<SushiType> _getActiveSushiTypes() {
+    return SushiType.values.take(_config.sushiTypeCount).toList();
+  }
+
+  /// Random sushi type from active types only
+  SushiType _randomSushiType() {
+    final types = _getActiveSushiTypes();
+    return types[_random.nextInt(types.length)];
+  }
+
+  /// Initialize grid with random elements (using only allowed sushi types)
   void initGrid() {
+    final types = _getActiveSushiTypes();
     _grid = List.generate(
       _config.rows,
       (_) => List.generate(
         _config.cols,
-        (_) => SushiElement(type: _randomSushiType()),
+        (_) => SushiElement(type: types[_random.nextInt(types.length)]),
       ),
     );
 
     // Ensure no initial matches and has valid moves
-    while (detectMatches().isNotEmpty || !hasValidMoves()) {
+    int attempts = 0;
+    while ((detectMatches().isNotEmpty || !hasValidMoves()) && attempts < 100) {
       _grid = List.generate(
         _config.rows,
         (_) => List.generate(
           _config.cols,
-          (_) => SushiElement(type: _randomSushiType()),
+          (_) => SushiElement(type: types[_random.nextInt(types.length)]),
         ),
       );
+      attempts++;
     }
   }
 
@@ -198,11 +214,6 @@ class GameEngine {
   /// Set custom grid (for testing)
   void setGrid(List<List<SushiElement>> grid) {
     _grid = grid;
-  }
-
-  /// Random sushi type
-  SushiType _randomSushiType() {
-    return SushiType.values[_random.nextInt(SushiType.values.length)];
   }
 
   /// Swap two elements
@@ -411,6 +422,7 @@ class GameEngine {
 
   /// Shuffle grid when no valid moves
   void shuffleGrid() {
+    int attempts = 0;
     do {
       final elements = _grid.expand((row) => row).toList();
       elements.shuffle(_random);
@@ -421,7 +433,8 @@ class GameEngine {
           _grid[row][col] = elements[i++];
         }
       }
-    } while (detectMatches().isNotEmpty || !hasValidMoves());
+      attempts++;
+    } while ((detectMatches().isNotEmpty || !hasValidMoves()) && attempts < 50);
   }
 
   /// Get a hint for the player

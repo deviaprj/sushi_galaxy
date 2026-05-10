@@ -11,6 +11,8 @@ A delicious match-3 puzzle game set in space! 🍣🌌
 - **Combo System**: Chain reactions for massive scores
 - **Lives System**: Strategic gameplay with recharge mechanics
 - **Dark Space Theme**: Beautiful neon aesthetic inspired by space and sushi
+- **Visual Effects**: Stunning cosmic background, particle effects, and glassmorphism UI
+- **Smooth Animations**: 60 FPS with custom painters for stars, nebulae, and floating elements
 
 ## Getting Started
 
@@ -48,6 +50,33 @@ flutter build ios --no-codesign
 # Web
 flutter build web
 ```
+
+### Install on Device via ADB
+
+Automatically install the APK on your connected Android device (auto-uninstalls old version):
+
+```bash
+# Make script executable
+chmod +x scripts/install-app.sh
+
+# Install APK (default package: com.sushigalaxy.game)
+./scripts/install-app.sh build/app.apk
+
+# Install with custom package name
+./scripts/install-app.sh build/app.apk com.myapp.package
+```
+
+The script will:
+1. Detect connected Android device
+2. Check if app is already installed
+3. Automatically uninstall old version (if exists)
+4. Install new APK (preserving user data with `-r` flag)
+5. Report success/failure
+
+**Requirements**:
+- ADB (Android SDK Platform Tools) in PATH
+- USB debugging enabled on device
+- Device authorized (accept RSA prompt)
 
 ## Project Structure
 
