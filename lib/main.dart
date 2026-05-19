@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:sushi_galaxy/ui/screens/auth_screen.dart';
 import 'package:sushi_galaxy/ui/theme/app_theme.dart';
-import 'package:sushi_galaxy/ui/screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await MobileAds.instance.initialize();
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
@@ -98,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const AuthGateScreen()),
       );
     }
   }

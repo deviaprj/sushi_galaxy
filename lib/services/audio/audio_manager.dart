@@ -9,7 +9,9 @@ class AudioManager {
   AudioManager._internal();
 
   final AudioPlayer _musicPlayer = AudioPlayer();
-  final AudioPlayer _sfxPlayer = AudioPlayer();
+  final List<AudioPlayer> _sfxPlayers = List.generate(4, (_) => AudioPlayer());
+  int _sfxCursor = 0;
+  bool _initialized = false;
 
   bool _soundEnabled = true;
   bool _musicEnabled = true;
@@ -19,10 +21,14 @@ class AudioManager {
 
   /// Initialize audio players
   Future<void> init() async {
+    if (_initialized) return;
     await _musicPlayer.setReleaseMode(ReleaseMode.loop);
     await _musicPlayer.setVolume(_musicVolume);
-    await _sfxPlayer.setReleaseMode(ReleaseMode.release);
-    await _sfxPlayer.setVolume(1.0);
+    for (final player in _sfxPlayers) {
+      await player.setReleaseMode(ReleaseMode.release);
+      await player.setVolume(1.0);
+    }
+    _initialized = true;
   }
 
   void setSoundEnabled(bool enabled) {
@@ -38,54 +44,56 @@ class AudioManager {
 
   // === Sound Effects ===
 
-  Future<void> playSwap() async {
+  Future<void> _playSfx(String assetPath) async {
     if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/swap.wav'));
+    if (!_initialized) {
+      await init();
+    }
+
+    // Round-robin pool to avoid SFX cutting each other when events overlap
+    final player = _sfxPlayers[_sfxCursor];
+    _sfxCursor = (_sfxCursor + 1) % _sfxPlayers.length;
+    await player.play(AssetSource(assetPath));
+  }
+
+  Future<void> playSwap() async {
+    await _playSfx('audio/sfx/swap.wav');
   }
 
   Future<void> playMatch() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/match.wav'));
+    await _playSfx('audio/sfx/match.wav');
   }
 
   Future<void> playCombo() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/combo.wav'));
+    await _playSfx('audio/sfx/combo.wav');
   }
 
   Future<void> playInvalid() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/invalid.wav'));
+    await _playSfx('audio/sfx/invalid.wav');
   }
 
   Future<void> playVictory() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/victory.wav'));
+    await _playSfx('audio/sfx/victory.wav');
   }
 
   Future<void> playFail() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/fail.wav'));
+    await _playSfx('audio/sfx/fail.wav');
   }
 
   Future<void> playLevelComplete() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/level_complete.wav'));
+    await _playSfx('audio/sfx/level_complete.wav');
   }
 
   Future<void> playHint() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/hint.wav'));
+    await _playSfx('audio/sfx/hint.wav');
   }
 
   Future<void> playTick() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/tick.wav'));
+    await _playSfx('audio/sfx/tick.wav');
   }
 
   Future<void> playBooster() async {
-    if (!_soundEnabled) return;
-    await _sfxPlayer.play(AssetSource('audio/sfx/booster.wav'));
+    await _playSfx('audio/sfx/booster.wav');
   }
 
   // === Background Music ===
@@ -158,6 +166,9 @@ class AudioManager {
   /// Dispose resources
   Future<void> dispose() async {
     await _musicPlayer.dispose();
-    await _sfxPlayer.dispose();
+    for (final player in _sfxPlayers) {
+      await player.dispose();
+    }
+    _initialized = false;
   }
 }

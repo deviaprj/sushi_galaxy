@@ -12,6 +12,7 @@ class LevelSelectScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(playerProgressProvider);
+    final lives = ref.watch(livesProvider);
 
     return Scaffold(
       body: Container(
@@ -114,10 +115,23 @@ class LevelSelectScreen extends ConsumerWidget {
                       isCompleted: isCompleted,
                       onTap: isUnlocked
                           ? () {
+                              if (!lives.canPlay) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Plus de vies. Regardez une video ou attendez la recharge.'),
+                                    backgroundColor: AppColors.error,
+                                  ),
+                                );
+                                return;
+                              }
+                              final isReplay = levelNum < progress.currentLevel;
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const GameScreen(),
+                                  builder: (_) => GameScreen(
+                                    startLevelNumber: levelNum,
+                                    countProgressRewards: !isReplay,
+                                  ),
                                 ),
                               );
                             }

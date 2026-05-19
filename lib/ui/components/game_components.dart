@@ -229,8 +229,8 @@ class _AnimatedSushiTileState extends State<AnimatedSushiTile>
             // Very visible golden overlay with arrow indicator
             IgnorePointer(
               child: Container(
-                width: tileSize + 4,
-                height: tileSize + 4,
+                width: tileSize,
+                height: tileSize,
                 decoration: BoxDecoration(
                   color: AppColors.goldenRice.withOpacity(0.45),
                   borderRadius: BorderRadius.circular(tileSize * 0.28),
@@ -725,9 +725,11 @@ class AnimatedCombo extends StatelessWidget {
           curve: Curves.elasticOut,
         )
         .fadeIn(duration: 200.ms)
-        .shimmer(
-          duration: 1500.ms,
-          color: Colors.white.withOpacity(0.3),
+        .slideY(
+          begin: -0.12,
+          end: 0,
+          duration: 220.ms,
+          curve: Curves.easeOutCubic,
         );
   }
 }

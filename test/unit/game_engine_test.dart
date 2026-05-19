@@ -113,20 +113,21 @@ void main() {
           8,
           (row) => List.generate(
             8,
-            (col) => SushiElement(type: SushiType.salmon),
+            (col) => SushiElement(
+              type: SushiType.values[(row * 3 + col) % SushiType.values.length],
+            ),
           ),
         );
-        // Only first row has salmon - creates horizontal match
-        for (int col = 0; col < 8; col++) {
-          grid[0][col] = SushiElement(type: SushiType.salmon);
-        }
+        grid[0][0] = const SushiElement(type: SushiType.salmon);
+        grid[0][1] = const SushiElement(type: SushiType.salmon);
+        grid[0][2] = const SushiElement(type: SushiType.salmon);
 
         engine.setGrid(grid);
 
         final matches = engine.detectMatches();
 
         expect(matches, isNotEmpty);
-        expect(matches.first.length, equals(8));
+        expect(matches.any((match) => match.length == 3), isTrue);
       });
 
       test('detects vertical match of 3', () {
@@ -135,20 +136,19 @@ void main() {
           (row) => List.generate(
             8,
             (col) => SushiElement(
-              type: col == 0 ? SushiType.tuna : SushiType.salmon,
+              type: SushiType.values[(row + col * 2) % SushiType.values.length],
             ),
           ),
         );
-        // First column all tuna - creates vertical match
-        for (int row = 0; row < 8; row++) {
-          grid[row][0] = SushiElement(type: SushiType.tuna);
-        }
+        grid[0][0] = const SushiElement(type: SushiType.tuna);
+        grid[1][0] = const SushiElement(type: SushiType.tuna);
+        grid[2][0] = const SushiElement(type: SushiType.tuna);
 
         engine.setGrid(grid);
 
         final matches = engine.detectMatches();
 
-        expect(matches, isNotEmpty);
+        expect(matches.any((match) => match.length == 3), isTrue);
       });
 
       test('returns empty list when no matches', () {
@@ -156,6 +156,55 @@ void main() {
         final matches = engine.detectMatches();
 
         expect(matches, isEmpty);
+      });
+
+      test('detects L shape as a special match', () {
+        final grid = List.generate(
+          8,
+          (row) => List.generate(
+            8,
+            (col) => SushiElement(
+              type: SushiType.values[(row + col) % SushiType.values.length],
+            ),
+          ),
+        );
+
+        grid[1][1] = const SushiElement(type: SushiType.salmon);
+        grid[2][1] = const SushiElement(type: SushiType.salmon);
+        grid[3][1] = const SushiElement(type: SushiType.salmon);
+        grid[3][2] = const SushiElement(type: SushiType.salmon);
+        grid[3][3] = const SushiElement(type: SushiType.salmon);
+
+        engine.setGrid(grid);
+
+        final matches = engine.detectMatches();
+
+        expect(matches.any((match) => match.matchType == MatchType.lShape), isTrue);
+      });
+
+      test('detects line of 4 with correct match type', () {
+        final grid = List.generate(
+          8,
+          (row) => List.generate(
+            8,
+            (col) => SushiElement(
+              type: SushiType.values[(row + col + 1) % SushiType.values.length],
+            ),
+          ),
+        );
+
+        grid[2][1] = const SushiElement(type: SushiType.tuna);
+        grid[2][2] = const SushiElement(type: SushiType.tuna);
+        grid[2][3] = const SushiElement(type: SushiType.tuna);
+        grid[2][4] = const SushiElement(type: SushiType.tuna);
+
+        engine.setGrid(grid);
+
+        final matches = engine.detectMatches();
+        final match = matches.firstWhere((candidate) => candidate.length == 4);
+
+        expect(match.matchType, MatchType.line4);
+        expect(match.createdPowerUp, PowerUpType.directional);
       });
     });
 
@@ -265,6 +314,25 @@ void main() {
         expect(result.scoreGained, greaterThan(0));
         // Grid should have been modified
         expect(result.grid, isNotNull);
+      });
+
+      test('applies combo multiplier to gravity score', () {
+        final grid = List.generate(
+          8,
+          (row) => List.generate(
+            8,
+            (col) => SushiElement(
+              type: row == 0 && col < 3 ? SushiType.salmon : SushiType.tuna,
+            ),
+          ),
+        );
+
+        engine.setGrid(grid);
+
+        final result = engine.applyGravity(comboMultiplier: 3);
+
+        final expectedScore = SushiType.salmon.score * 3 * 3;
+        expect(result.scoreGained, greaterThanOrEqualTo(expectedScore));
       });
     });
 
@@ -376,16 +444,19 @@ void main() {
       final match4 = Match(
         positions: [GridPosition(0, 0), GridPosition(0, 1), GridPosition(0, 2), GridPosition(0, 3)],
         type: SushiType.salmon,
+        matchType: MatchType.line4,
       );
 
       final match5 = Match(
         positions: [GridPosition(0, 0), GridPosition(0, 1), GridPosition(0, 2), GridPosition(0, 3), GridPosition(0, 4)],
         type: SushiType.salmon,
+        matchType: MatchType.line5,
       );
 
       final match6 = Match(
         positions: [GridPosition(0, 0), GridPosition(0, 1), GridPosition(0, 2), GridPosition(0, 3), GridPosition(0, 4), GridPosition(0, 5)],
         type: SushiType.salmon,
+        matchType: MatchType.line6Plus,
       );
 
       expect(match3.createsPowerUp, isFalse);
@@ -393,7 +464,7 @@ void main() {
       expect(match5.createsPowerUp, isTrue);
       expect(match6.createsPowerUp, isTrue);
 
-      expect(match4.createdPowerUp, equals(PowerUpType.radial));
+      expect(match4.createdPowerUp, equals(PowerUpType.directional));
       expect(match5.createdPowerUp, equals(PowerUpType.eraser));
       expect(match6.createdPowerUp, equals(PowerUpType.superBomb));
     });

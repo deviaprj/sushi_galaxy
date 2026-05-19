@@ -40,6 +40,7 @@ class Level {
   final String name;
   final bool isEvent;
   final int sushiTypeCount;
+  final int comboTier;
 
   const Level({
     required this.number,
@@ -52,6 +53,7 @@ class Level {
     this.name = '',
     this.isEvent = false,
     this.sushiTypeCount = 8,
+    this.comboTier = 0,
   });
 
   Level copyWith({
@@ -65,6 +67,7 @@ class Level {
     String? name,
     bool? isEvent,
     int? sushiTypeCount,
+    int? comboTier,
   }) {
     return Level(
       number: number ?? this.number,
@@ -77,6 +80,7 @@ class Level {
       name: name ?? this.name,
       isEvent: isEvent ?? this.isEvent,
       sushiTypeCount: sushiTypeCount ?? this.sushiTypeCount,
+      comboTier: comboTier ?? this.comboTier,
     );
   }
 }
@@ -106,7 +110,19 @@ class LevelGenerator {
       difficulty: _calculateDifficulty(levelNumber),
       name: name,
       sushiTypeCount: difficultyParams.sushiTypeCount,
+      comboTier: _comboTierForLevel(levelNumber),
     );
+  }
+
+  int _comboTierForLevel(int level) {
+    if (level < 5) return 0;
+    if (level < 10) return 1;
+    if (level < 15) return 2;
+    if (level < 20) return 3;
+    if (level < 30) return 4;
+    if (level < 40) return 5;
+    if (level < 50) return 6;
+    return 7;
   }
 
   /// Progressive difficulty: fewer sushi types early, more moves, smaller grids
@@ -202,7 +218,7 @@ class LevelGenerator {
     ];
 
     if (level <= 10) {
-      return 'Level $level';
+      return 'Training Level $level';
     } else if (level <= 100) {
       return names[(level - 11) ~/ 10 % names.length];
     } else {

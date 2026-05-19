@@ -2,26 +2,119 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:sushi_galaxy/core/store/game_providers.dart';
+import 'package:sushi_galaxy/services/ads/rewarded_ad_service.dart';
 import 'package:sushi_galaxy/ui/theme/app_theme.dart';
 import 'package:sushi_galaxy/ui/components/effects/cosmic_background.dart';
 import 'package:sushi_galaxy/ui/screens/game_screen.dart';
-import 'package:sushi_galaxy/ui/screens/home_screen.dart';
+import 'package:sushi_galaxy/ui/screens/shop_screen.dart';
 
-/// Level Fail Screen with warm terracotta theme
-class LevelFailScreen extends ConsumerWidget {
+/// Paramètres passés depuis game_screen lors du game over chrono
+class TimeUpParams {
+  final int savedScore;         // score au moment où le temps s'est arrêté
+  final List<List<dynamic>>? gridSnapshot; // snapshot de la grille (non utilisé pour l'instant)
+
+  const TimeUpParams({required this.savedScore, this.gridSnapshot});
+}
+
+/// Écran fin de niveau - Temps écoulé
+/// 3 boutons : Réessayer (perd une vie) | Continuer (rewarded ad) | Menu (boutique)
+class LevelFailScreen extends ConsumerStatefulWidget {
   final int score;
   final int level;
+  final bool isTimeUp;  // true si c'est le temps qui s'est écoulé (vs 0 coups)
 
   const LevelFailScreen({
     super.key,
     required this.score,
     required this.level,
+    this.isTimeUp = true,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LevelFailScreen> createState() => _LevelFailScreenState();
+}
+
+class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
+  bool _isWatchingAd = false;
+  int _validatedAds = 0;
+
+  int get _requiredAdsForContinue => widget.level > 20 ? 2 : 1;
+
+  Future<void> _watchAdAndContinue() async {
+    if (_isWatchingAd) return;
+
+    setState(() {
+      _isWatchingAd = true;
+      _validatedAds = 0;
+    });
+
+    var rewardEarned = false;
+    for (int index = 0; index < _requiredAdsForContinue; index++) {
+      rewardEarned = await RewardedAdService.instance.showRewardedAd();
+      if (!mounted) return;
+
+      if (!rewardEarned) {
+        setState(() => _isWatchingAd = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Recompense non validee. Il faut relancer les $_requiredAdsForContinue videos.',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      setState(() => _validatedAds = index + 1);
+    }
+
+    if (!mounted) return;
+    setState(() => _isWatchingAd = false);
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.nebulaPurple,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Recompense obtenue',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          _requiredAdsForContinue == 2
+              ? '2 videos valides. Tentative bonus debloquee sans consommer de vie.'
+              : 'Tentative bonus debloquee. Le niveau redemarre sans consommer de vie.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Continuer',
+              style: TextStyle(color: AppColors.goldenRice),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => GameScreen(initialScore: widget.score)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lives = ref.watch(livesProvider);
     final progress = ref.watch(playerProgressProvider);
-    final canContinue = progress.gems >= 50;
 
     return Scaffold(
       body: CosmicBackground(
@@ -30,10 +123,7 @@ class LevelFailScreen extends ConsumerWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                AppColors.deepSpaceBlue,
-                AppColors.cosmosDark,
-              ],
+              colors: [AppColors.deepSpaceBlue, AppColors.cosmosDark],
             ),
           ),
           child: SafeArea(
@@ -43,47 +133,78 @@ class LevelFailScreen extends ConsumerWidget {
                 children: [
                   const Spacer(),
 
-                  // Sad emoji
-                  const Text(
-                    '😢',
-                    style: TextStyle(fontSize: 80),
+                  // Emoji + titre
+                  Text(
+                    widget.isTimeUp ? '⏰' : '😢',
+                    style: const TextStyle(fontSize: 80),
                   ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
 
                   const SizedBox(height: 16),
 
-                  // Title with warm gradient
                   ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
-                      colors: [
-                        AppColors.error,
-                        AppColors.terracotta,
-                      ],
+                      colors: [AppColors.error, AppColors.terracotta],
                     ).createShader(bounds),
-                    child: const Text(
-                      'LEVEL FAILED',
-                      style: TextStyle(
-                        fontSize: 32,
+                    child: Text(
+                      widget.isTimeUp ? 'TEMPS ÉCOULÉ !' : 'NIVEAU ÉCHOUÉ',
+                      style: const TextStyle(
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        letterSpacing: 3,
+                        letterSpacing: 2,
                       ),
                     ),
                   ).animate().fadeIn(delay: 300.ms),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
-                    'Level $level',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                    ),
+                    'Niveau ${widget.level}',
+                    style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 10),
 
-                  // Score with glass effect
+                  // Petite barre d'info : niveau + etoiles
                   Container(
-                    padding: const EdgeInsets.all(28),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.glassWhite.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.textSecondary.withOpacity(0.25)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('🎯', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Niveau ${widget.level}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Text('⭐', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${progress.totalStars} etoiles',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate().fadeIn(delay: 450.ms),
+
+                  const SizedBox(height: 28),
+
+                  // Score
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 40),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -94,28 +215,27 @@ class LevelFailScreen extends ConsumerWidget {
                         ],
                       ),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: AppColors.textSecondary.withOpacity(0.3),
-                      ),
+                      border: Border.all(color: AppColors.textSecondary.withOpacity(0.3)),
                     ),
                     child: Column(
                       children: [
-                        const Text(
-                          'SCORE',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
+                        const Text('SCORE', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, letterSpacing: 2)),
+                        const SizedBox(height: 8),
                         Text(
-                          '$score',
-                          style: const TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
+                          '${widget.score}',
+                          style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 8),
+                        // Vies restantes
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Vies : ', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                            ...List.generate(lives.maxLives, (i) => Text(
+                              i < lives.currentLives ? '❤️' : '🖤',
+                              style: const TextStyle(fontSize: 18),
+                            )),
+                          ],
                         ),
                       ],
                     ),
@@ -123,115 +243,121 @@ class LevelFailScreen extends ConsumerWidget {
 
                   const Spacer(),
 
-                  // Continue option
-                  if (canContinue) ...[
+                  // Si visionnage pub en cours
+                  if (_isWatchingAd) ...[
                     Container(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.terracotta.withOpacity(0.25),
-                            AppColors.sakuraPink.withOpacity(0.15),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.nebulaPurple,
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: AppColors.terracotta),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.terracotta.withOpacity(0.15),
-                            blurRadius: 15,
-                            spreadRadius: 2,
-                          ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          CircularProgressIndicator(color: AppColors.terracotta),
+                          SizedBox(height: 16),
+                            Text('📺 Chargement de la video...', style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
+                          SizedBox(height: 6),
+                            Text('La rewarded ad de test va s\'ouvrir en plein ecran',
+                              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                              textAlign: TextAlign.center),
                         ],
                       ),
-                      child: Row(
-                        children: [
-                          const Text('💎', style: TextStyle(fontSize: 26)),
-                          const SizedBox(width: 14),
-                          const Expanded(
-                            child: Text(
-                              'Continue with +5 moves',
-                              style: TextStyle(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            '50',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.terracottaLight,
-                            ),
-                          ),
-                        ],
+                    ),
+                    if (_requiredAdsForContinue > 1) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        'Progression recompense : $_validatedAds/$_requiredAdsForContinue videos',
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ] else ...[
+                    // Bouton 1 : RÉESSAYER (perd une vie)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 58,
+                      child: OutlinedButton.icon(
+                        icon: const Text('💔', style: TextStyle(fontSize: 20)),
+                        label: const Text(
+                          'RÉESSAYER (−1 ❤️)',
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.error),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.error, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                        ),
+                        onPressed: lives.currentLives > 0
+                            ? () {
+                                ref.read(livesProvider.notifier).useLife();
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const GameScreen()),
+                                );
+                              }
+                            : null,
                       ),
                     ).animate().fadeIn(delay: 800.ms),
-                    const SizedBox(height: 14),
+
+                    const SizedBox(height: 12),
+
+                    // Bouton 2 : CONTINUER (rewarded ad)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 62,
+                      child: ElevatedButton.icon(
+                        icon: const Text('📺', style: TextStyle(fontSize: 22)),
+                        label: Text(
+                          _requiredAdsForContinue == 2
+                              ? 'CONTINUER  (Regarder 2 videos)'
+                              : 'CONTINUER  (Regarder une video)',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.terracotta,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          elevation: 6,
+                          shadowColor: AppColors.terracotta.withOpacity(0.5),
+                        ),
+                        onPressed: _watchAdAndContinue,
+                      ),
+                    ).animate().fadeIn(delay: 950.ms),
+
+                    const SizedBox(height: 12),
+
+                    // Bouton 3 : MENU → Boutique
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: OutlinedButton.icon(
+                        icon: const Text('🛒', style: TextStyle(fontSize: 20)),
+                        label: const Text(
+                          'MENU  →  Boutique',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.goldenRice,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.goldenRice, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ShopScreen()),
+                          );
+                        },
+                      ),
+                    ).animate().fadeIn(delay: 1100.ms),
                   ],
 
-                  // Continue button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 60,
-                    child: ElevatedButton(
-                      onPressed: canContinue
-                          ? () {
-                              ref.read(playerProgressProvider.notifier).spendGems(50);
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => const GameScreen()),
-                              );
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.terracotta,
-                        disabledBackgroundColor:
-                            AppColors.textSecondary.withOpacity(0.3),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      child: Text(
-                        canContinue ? 'CONTINUE (50 💎)' : 'NOT ENOUGH GEMS',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomeScreen()),
-                          (route) => false,
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.terracotta),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      child: const Text(
-                        'RETRY',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.terracottaLight,
-                        ),
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

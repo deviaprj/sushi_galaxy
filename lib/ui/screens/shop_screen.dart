@@ -68,7 +68,7 @@ class ShopScreen extends ConsumerWidget {
               // Shop tabs
               Expanded(
                 child: DefaultTabController(
-                  length: 2,
+                  length: 3,
                   child: Column(
                     children: [
                       Container(
@@ -88,6 +88,7 @@ class ShopScreen extends ConsumerWidget {
                           tabs: const [
                             Tab(text: '💎 Gems'),
                             Tab(text: '🎁 Boosters'),
+                            Tab(text: '⏱️ Temps'),
                           ],
                         ),
                       ),
@@ -97,6 +98,7 @@ class ShopScreen extends ConsumerWidget {
                           children: [
                             _GemsTab(),
                             _BoostersTab(),
+                            const _TimePassTab(),
                           ],
                         ),
                       ),
@@ -179,13 +181,13 @@ class _GemPack {
   });
 }
 
-class _GemPackCard extends StatelessWidget {
+class _GemPackCard extends ConsumerWidget {
   final _GemPack pack;
 
   const _GemPackCard({required this.pack});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Stack(
       children: [
         Container(
@@ -257,14 +259,25 @@ class _GemPackCard extends StatelessWidget {
                 ),
               ),
               // Price
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.sakuraPink,
-                  borderRadius: BorderRadius.circular(12),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(playerProgressProvider.notifier).addGems(pack.gems);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Achat test : +${pack.gems} gemmes ajoutees'),
+                      backgroundColor: AppColors.avocado,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.sakuraPink,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: Text(
                   '\$${pack.price.toStringAsFixed(2)}',
@@ -307,11 +320,53 @@ class _GemPackCard extends StatelessWidget {
 class _BoostersTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    return const _FunctionalBoostersTab();
+  }
+}
+
+class _FunctionalBoostersTab extends ConsumerWidget {
+  const _FunctionalBoostersTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progress = ref.watch(playerProgressProvider);
     final boosters = [
-      {'icon': '🔨', 'name': 'Hammer', 'desc': 'Destroy 1 tile', 'price': 50},
-      {'icon': '🔀', 'name': 'Shuffle', 'desc': 'Mix the board', 'price': 75},
-      {'icon': '➕', 'name': '+5 Moves', 'desc': 'Extra moves', 'price': 100},
-      {'icon': '💎', 'name': 'Extra Life', 'desc': 'Get 1 life', 'price': 60},
+      _ShopBoosterPack(
+        icon: '🔨',
+        name: 'Marteau',
+        desc: 'Detruit une tuile et declenche la gravite',
+        price: 50,
+        stock: progress.hammerBoosters,
+        accent: AppColors.terracotta,
+        onBuy: () => ref.read(playerProgressProvider.notifier).addHammerBoosters(1),
+      ),
+      _ShopBoosterPack(
+        icon: '🔀',
+        name: 'Melange',
+        desc: 'Remix total de la grille',
+        price: 75,
+        stock: progress.shuffleBoosters,
+        accent: AppColors.neonPurple,
+        onBuy: () => ref.read(playerProgressProvider.notifier).addShuffleBoosters(1),
+      ),
+      _ShopBoosterPack(
+        icon: '🧰',
+        name: 'Pack marteaux x3',
+        desc: 'Reserve rapide pour plusieurs niveaux',
+        price: 135,
+        stock: progress.hammerBoosters,
+        accent: AppColors.goldenRice,
+        onBuy: () => ref.read(playerProgressProvider.notifier).addHammerBoosters(3),
+      ),
+      _ShopBoosterPack(
+        icon: '🎛️',
+        name: 'Pack melanges x3',
+        desc: 'Trois remises a zero de grille',
+        price: 200,
+        stock: progress.shuffleBoosters,
+        accent: AppColors.sakuraPink,
+        onBuy: () => ref.read(playerProgressProvider.notifier).addShuffleBoosters(3),
+      ),
     ];
 
     return GridView.builder(
@@ -320,72 +375,260 @@ class _BoostersTab extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.2,
+        childAspectRatio: 0.88,
       ),
       itemCount: boosters.length,
       itemBuilder: (context, index) {
         final booster = boosters[index];
+        final canBuy = progress.gems >= booster.price;
+
         return Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.glassWhite,
-            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                booster.accent.withOpacity(0.22),
+                AppColors.glassWhite.withOpacity(0.08),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: booster.accent.withOpacity(0.4)),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                booster['icon'] as String,
-                style: const TextStyle(fontSize: 36),
+              Row(
+                children: [
+                  Text(booster.icon, style: const TextStyle(fontSize: 30)),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      'Stock ${booster.stock}',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
-                booster['name'] as String,
+                booster.name,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
+              const SizedBox(height: 6),
               Text(
-                booster['desc'] as String,
+                booster.desc,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
+                  height: 1.25,
                   color: AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.neonPurple.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('💎', style: TextStyle(fontSize: 12)),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${booster['price']}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: canBuy
+                      ? () {
+                          ref.read(playerProgressProvider.notifier).spendGems(booster.price);
+                          booster.onBuy();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${booster.name} ajoute au stock'),
+                              backgroundColor: booster.accent,
+                            ),
+                          );
+                        }
+                      : null,
+                  icon: const Text('💎', style: TextStyle(fontSize: 14)),
+                  label: Text('${booster.price}'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        canBuy ? booster.accent : AppColors.textSecondary.withOpacity(0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                  ),
                 ),
               ),
             ],
           ),
-        ).animate().fadeIn(delay: Duration(milliseconds: 100 * index));
+        ).animate().fadeIn(delay: Duration(milliseconds: 90 * index)).slideY(begin: 0.08);
       },
     );
   }
+}
+
+class _ShopBoosterPack {
+  final String icon;
+  final String name;
+  final String desc;
+  final int price;
+  final int stock;
+  final Color accent;
+  final VoidCallback onBuy;
+
+  const _ShopBoosterPack({
+    required this.icon,
+    required this.name,
+    required this.desc,
+    required this.price,
+    required this.stock,
+    required this.accent,
+    required this.onBuy,
+  });
+}
+
+/// Subscription screen
+class _TimePassTab extends ConsumerWidget {
+  const _TimePassTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progress = ref.watch(playerProgressProvider);
+
+    final packs = [
+      _TimePack(icon: '⏱️', label: '+60 secondes', seconds: 60, price: 30, color: AppColors.avocado),
+      _TimePack(icon: '⏰', label: '+120 secondes', seconds: 120, price: 50, color: AppColors.terracotta, popular: true),
+      _TimePack(icon: '🕐', label: '+300 secondes', seconds: 300, price: 100, color: AppColors.neonPurple),
+      _TimePack(icon: '❤️', label: '+1 vie',        seconds: 0,   price: 60, color: AppColors.sakuraPink, isLife: true),
+    ];
+
+    return Column(
+      children: [
+        // Temps stocké actuel
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.goldenRice.withOpacity(0.15), AppColors.glassWhite.withOpacity(0.05)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.goldenRice.withOpacity(0.4)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('⏰', style: TextStyle(fontSize: 26)),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${progress.storedTimeSeconds} sec stockées',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.goldenRice)),
+                    const Text('Utilisables comme bonus en jeu',
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            itemCount: packs.length,
+            itemBuilder: (context, i) {
+              final pack = packs[i];
+              final canBuy = progress.gems >= pack.price;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [pack.color.withOpacity(0.18), AppColors.glassWhite.withOpacity(0.06)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: pack.color.withOpacity(pack.popular ? 0.8 : 0.3), width: pack.popular ? 1.5 : 1),
+                ),
+                child: Row(
+                  children: [
+                    Text(pack.icon, style: const TextStyle(fontSize: 36)),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (pack.popular)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              margin: const EdgeInsets.only(bottom: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.terracotta,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text('⭐ POPULAIRE', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1)),
+                            ),
+                          Text(pack.label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                          const SizedBox(height: 2),
+                          Text(pack.isLife ? 'Régénération immédiate' : 'Ajout à votre réserve de temps',
+                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Text('💎', style: TextStyle(fontSize: 14)),
+                      label: Text('${pack.price}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: canBuy ? pack.color : AppColors.textSecondary.withOpacity(0.4),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      onPressed: canBuy
+                          ? () {
+                              ref.read(playerProgressProvider.notifier).spendGems(pack.price);
+                              if (pack.isLife) {
+                                ref.read(livesProvider.notifier).addLife();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('❤️ +1 vie ajoutée !'), backgroundColor: AppColors.sakuraPink),
+                                );
+                              } else {
+                                ref.read(playerProgressProvider.notifier).addStoredTime(pack.seconds);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('⏰ +${pack.seconds}s ajoutées à votre réserve !'), backgroundColor: AppColors.terracotta),
+                                );
+                              }
+                            }
+                          : null,
+                    ),
+                  ],
+                ),
+              ).animate().fadeIn(delay: Duration(milliseconds: 80 * i)).slideX(begin: 0.15);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TimePack {
+  final String icon;
+  final String label;
+  final int seconds;
+  final int price;
+  final Color color;
+  final bool popular;
+  final bool isLife;
+  const _TimePack({required this.icon, required this.label, required this.seconds, required this.price, required this.color, this.popular = false, this.isLife = false});
 }
 
 /// Subscription screen

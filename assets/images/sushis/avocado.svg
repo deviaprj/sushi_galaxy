@@ -1,100 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
-    <filter id="dropShadow" x="-25%" y="-25%" width="150%" height="150%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
-      <feOffset dx="1" dy="2" result="offsetBlur"/>
-      <feFlood flood-color="#1B3A1B" flood-opacity="0.35"/>
-      <feComposite in2="offsetBlur" operator="in" result="shadow"/>
-      <feMerge>
-        <feMergeNode in="shadow"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="neumorphic" x="-10%" y="-10%" width="120%" height="120%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
-      <feOffset dx="-1" dy="-1" result="lightOffset"/>
-      <feFlood flood-color="#ffffff" flood-opacity="0.4"/>
-      <feComposite in2="lightOffset" operator="in" result="highlight"/>
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="darkBlur"/>
-      <feOffset dx="1.5" dy="1.5" result="darkOffset"/>
-      <feFlood flood-color="#000000" flood-opacity="0.2"/>
-      <feComposite in2="darkOffset" operator="in" result="innerShadow"/>
-      <feMerge>
-        <feMergeNode in="highlight"/>
-        <feMergeNode in="innerShadow"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <!-- Avocado skin gradient -->
-    <linearGradient id="avocadoGrad" x1="0" y1="0" x2="0.2" y2="1">
-      <stop offset="0%" stop-color="#81C784"/>
-      <stop offset="30%" stop-color="#66BB6A"/>
-      <stop offset="70%" stop-color="#43A047"/>
-      <stop offset="100%" stop-color="#388E3C"/>
+    <linearGradient id="avoGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#69F0AE"/>
+      <stop offset="50%" stop-color="#00C853"/>
+      <stop offset="100%" stop-color="#00701A"/>
     </linearGradient>
-    <!-- Avocado inner flesh -->
-    <linearGradient id="fleshGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#F1F8E9"/>
-      <stop offset="30%" stop-color="#DCEDC8"/>
-      <stop offset="70%" stop-color="#C5E1A5"/>
-      <stop offset="100%" stop-color="#AED581"/>
-    </linearGradient>
-    <!-- Seed gradient -->
-    <radialGradient id="seedGrad" cx="0.4" cy="0.35" r="0.55">
-      <stop offset="0%" stop-color="#8D6E63"/>
-      <stop offset="50%" stop-color="#6D4C41"/>
-      <stop offset="100%" stop-color="#4E342E"/>
+    <radialGradient id="avoPit" cx="0.5" cy="0.55" r="0.4">
+      <stop offset="0%" stop-color="#5D4037"/>
+      <stop offset="100%" stop-color="#3E2723"/>
     </radialGradient>
-    <!-- Seed highlight -->
-    <linearGradient id="seedGloss" x1="0" y1="0" x2="0.3" y2="1">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-      <stop offset="40%" stop-color="#ffffff" stop-opacity="0.1"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-    <!-- Glossy highlight -->
-    <linearGradient id="glossAvocado" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
-      <stop offset="30%" stop-color="#ffffff" stop-opacity="0.2"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-    <!-- Radial glow -->
-    <radialGradient id="avocadoGlow" cx="0.42" cy="0.28" r="0.6">
-      <stop offset="0%" stop-color="#A5D6A7" stop-opacity="0.45"/>
-      <stop offset="50%" stop-color="#66BB6A" stop-opacity="0.1"/>
-      <stop offset="100%" stop-color="#388E3C" stop-opacity="0"/>
-    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-
-  <g filter="url(#dropShadow)">
-    <!-- Avocado outer pear shape -->
-    <path d="M32 6 Q48 6 52 22 Q56 38 48 48 Q40 58 32 58 Q24 58 16 48 Q8 38 12 22 Q16 6 32 6Z" fill="url(#avocadoGrad)" filter="url(#neumorphic)"/>
-    <!-- Radial glow -->
-    <path d="M32 6 Q48 6 52 22 Q56 38 48 48 Q40 58 32 58 Q24 58 16 48 Q8 38 12 22 Q16 6 32 6Z" fill="url(#avocadoGlow)"/>
-
-    <!-- Avocado inner flesh (lighter area) -->
-    <path d="M32 12 Q44 12 47 24 Q50 36 44 44 Q38 52 32 52 Q26 52 20 44 Q14 36 17 24 Q20 12 32 12Z" fill="url(#fleshGrad)" opacity="0.85"/>
-
-    <!-- Flesh texture lines -->
-    <path d="M22 20 Q27 18 32 20" stroke="#AED581" stroke-width="0.4" fill="none" opacity="0.4"/>
-    <path d="M36 18 Q40 20 42 24" stroke="#AED581" stroke-width="0.4" fill="none" opacity="0.35"/>
-    <path d="M20 36 Q24 38 28 36" stroke="#C5E1A5" stroke-width="0.3" fill="none" opacity="0.3"/>
-
-    <!-- Seed -->
-    <ellipse cx="32" cy="34" rx="8" ry="9" fill="url(#seedGrad)"/>
-    <!-- Seed gloss -->
-    <ellipse cx="32" cy="34" rx="8" ry="9" fill="url(#seedGloss)"/>
-    <!-- Seed specular highlight -->
-    <ellipse cx="29" cy="30" rx="3" ry="2.5" fill="#ffffff" opacity="0.3"/>
-    <ellipse cx="29" cy="30" rx="1.8" ry="1.3" fill="#ffffff" opacity="0.15"/>
-
-    <!-- Glossy highlight on avocado body -->
-    <path d="M20 14 Q28 10 38 12 Q44 14 46 20 Q38 16 28 15 Q22 15 20 14Z" fill="url(#glossAvocado)"/>
-
-    <!-- Main specular highlight -->
-    <ellipse cx="24" cy="16" rx="5" ry="2.5" fill="#ffffff" opacity="0.35"/>
-    <ellipse cx="24" cy="16" rx="3" ry="1.2" fill="#ffffff" opacity="0.18"/>
-
-    <!-- Bottom shadow accent -->
-    <path d="M22 52 Q32 58 42 52" stroke="#1B5E20" stroke-width="0.6" fill="none" opacity="0.2"/>
-  </g>
+  <!-- Rice base -->
+  <ellipse cx="32" cy="44" rx="20" ry="10" fill="#FFFFF0" filter="url(#glow)"/>
+  <!-- Avocado slice (pear shape) -->
+  <path d="M32 14 C22 14 16 22 16 32 C16 40 22 46 32 46 C42 46 48 40 48 32 C48 22 42 14 32 14 Z" 
+        fill="url(#avoGrad)"/>
+  <!-- Inner flesh (lighter) -->
+  <path d="M32 18 C24 18 20 24 20 32 C20 38 24 43 32 43 C40 43 44 38 44 32 C44 24 40 18 32 18 Z" 
+        fill="#B9F6CA" opacity="0.8"/>
+  <!-- Pit (brown center) -->
+  <ellipse cx="32" cy="33" rx="7" ry="8" fill="url(#avoPit)"/>
+  <!-- Pit sheen -->
+  <ellipse cx="29" cy="30" rx="2.5" ry="2" fill="#8D6E63" opacity="0.6"/>
+  <!-- Outer skin border -->
+  <path d="M32 14 C22 14 16 22 16 32 C16 40 22 46 32 46 C42 46 48 40 48 32 C48 22 42 14 32 14 Z" 
+        fill="none" stroke="#00701A" stroke-width="2"/>
+  <!-- Top shine -->
+  <ellipse cx="28" cy="19" rx="5" ry="2.5" fill="#FFFFFF" opacity="0.35"/>
 </svg>

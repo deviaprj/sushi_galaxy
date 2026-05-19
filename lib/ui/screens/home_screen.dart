@@ -7,7 +7,7 @@ import 'package:sushi_galaxy/ui/components/effects/cosmic_background.dart';
 import 'package:sushi_galaxy/ui/screens/level_select_screen.dart';
 import 'package:sushi_galaxy/ui/screens/shop_screen.dart';
 import 'package:sushi_galaxy/ui/screens/settings_screen.dart';
-import 'package:sushi_galaxy/ui/screens/level_complete_screen.dart';
+import 'package:sushi_galaxy/ui/screens/profile_screen.dart';
 
 /// Home Screen - Main menu with warm terracotta theme
 class HomeScreen extends ConsumerWidget {
@@ -288,14 +288,7 @@ class HomeScreen extends ConsumerWidget {
                 )
                     .animate()
                     .fadeIn(delay: 900.ms)
-                    .slideY(begin: 0.3)
-                    .then()
-                    .shimmer(
-                      duration: 2000.ms,
-                      color: lives.canPlay
-                          ? Colors.white.withOpacity(0.2)
-                          : Colors.transparent,
-                    ),
+                  .slideY(begin: 0.3),
 
                 const SizedBox(height: 20),
 
@@ -332,13 +325,13 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     _EnhancedIconButton(
                       icon: '👤',
-                      label: 'Profile',
+                      label: 'Profil',
                       color: AppColors.neonPurple,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const LevelCompleteScreen(score: 1000, stars: 3, level: 1),
+                            builder: (_) => const ProfileScreen(),
                           ),
                         );
                       },
@@ -503,15 +496,5 @@ class _EnhancedIconButton extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Profile screen (placeholder)
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const LevelCompleteScreen(score: 1000, stars: 3, level: 1);
   }
 }

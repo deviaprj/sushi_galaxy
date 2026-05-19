@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// Sushi Galaxy Color Palette - Warm Terracotta Space Theme
+/// Sushi Galaxy Color Palette - Electric Galaxy Blue Theme
 class AppColors {
-  // Primary - Warm terracotta and restaurant tones
-  static const Color terracotta = Color(0xFFE07A5F);
-  static const Color terracottaDark = Color(0xFFC4603F);
-  static const Color terracottaLight = Color(0xFFF2A68D);
+  // Primary - Electric galaxy blue tones
+  static const Color terracotta = Color(0xFF00A9FF);
+  static const Color terracottaDark = Color(0xFF0074D6);
+  static const Color terracottaLight = Color(0xFF6EDBFF);
   static const Color warmCream = Color(0xFFFFF3E0);
   static const Color warmBeige = Color(0xFFFFE0B2);
   static const Color restaurantLight = Color(0xFFFFFAF0);
@@ -26,22 +26,22 @@ class AppColors {
   static const Color mintGreen = Color(0xFF66BB6A);
   static const Color cosmicBlue = Color(0xFF5C6BC0);
 
-  // Elements (Sushi types) - distinct high-contrast palette
-  static const Color salmon = Color(0xFFFF5722);     // Deep orange-red
-  static const Color tuna = Color(0xFFD32F2F);        // Rich crimson
-  static const Color shrimp = Color(0xFFFF9800);      // Bright orange
-  static const Color tamago = Color(0xFFFFEB3B);      // Bright yellow
-  static const Color avocado = Color(0xFF4CAF50);     // Rich green
-  static const Color cucumber = Color(0xFF00BCD4);    // Teal/cyan
-  static const Color cheese = Color(0xFFFFC107);      // Amber gold
-  static const Color sausage = Color(0xFF9C27B0);     // Purple
+  // Elements (Sushi types) - maximally distinct palette (each ~45° apart on hue wheel)
+  static const Color salmon = Color(0xFFFF4081);      // Hot pink/magenta (was orange-red)
+  static const Color tuna = Color(0xFF1565C0);        // Deep cobalt blue (was crimson) - tuna sashimi
+  static const Color shrimp = Color(0xFFFF6D00);      // Vivid amber-orange
+  static const Color tamago = Color(0xFFFFD600);      // Bright canary yellow (egg)
+  static const Color avocado = Color(0xFF00C853);     // Vivid lime-green
+  static const Color cucumber = Color(0xFF00B0FF);    // Sky cyan-blue
+  static const Color cheese = Color(0xFF8D6E63);      // Caramel brown (clearly distinct from orange shrimp)
+  static const Color sausage = Color(0xFF7C4DFF);     // Vivid violet-purple
 
   // UI
   static const Color glassWhite = Color(0x80FFFFFF);
   static const Color glassDark = Color(0x40000000);
   static const Color textPrimary = Color(0xFFFFF8E1);
   static const Color textSecondary = Color(0xFFB0A090);
-  static const Color textAccent = Color(0xFFE07A5F);
+  static const Color textAccent = Color(0xFF00A9FF);
   static const Color success = Color(0xFF66BB6A);
   static const Color error = Color(0xFFEF5350);
   static const Color warning = Color(0xFFFF9800);
@@ -55,9 +55,9 @@ class AppColors {
   ];
 
   static const List<Color> terracottaGradient = [
-    Color(0xFFE07A5F),
-    Color(0xFFF06292),
-    Color(0xFFBB86FC),
+    Color(0xFF6EDBFF),
+    Color(0xFF00A9FF),
+    Color(0xFF3B6CFF),
   ];
 
   static const List<Color> goldGradient = [
@@ -191,21 +191,21 @@ extension SushiTypeExtension on SushiType {
   Color get darkColor {
     switch (this) {
       case SushiType.salmon:
-        return const Color(0xFFBF360C);
+        return const Color(0xFFC51162); // deep pink
       case SushiType.tuna:
-        return const Color(0xFFB71C1C);
+        return const Color(0xFF0D47A1); // navy blue
       case SushiType.shrimp:
-        return const Color(0xFFE65100);
+        return const Color(0xFFE65100); // deep orange
       case SushiType.tamago:
-        return const Color(0xFFF9A825);
+        return const Color(0xFFF9A825); // amber
       case SushiType.avocado:
-        return const Color(0xFF2E7D32);
+        return const Color(0xFF00701A); // dark green
       case SushiType.cucumber:
-        return const Color(0xFF00838F);
+        return const Color(0xFF0081CB); // deep sky blue
       case SushiType.cheese:
-        return const Color(0xFFFF8F00);
+        return const Color(0xFF5D4037); // deep caramel brown
       case SushiType.sausage:
-        return const Color(0xFF6A1B9A);
+        return const Color(0xFF4527A0); // deep violet
     }
   }
 
@@ -213,21 +213,21 @@ extension SushiTypeExtension on SushiType {
   Color get lightColor {
     switch (this) {
       case SushiType.salmon:
-        return const Color(0xFFFFAB91);
+        return const Color(0xFFFF80AB); // light pink
       case SushiType.tuna:
-        return const Color(0xFFEF9A9A);
+        return const Color(0xFF5E92F3); // light blue
       case SushiType.shrimp:
-        return const Color(0xFFFFCC80);
+        return const Color(0xFFFFAB40); // light amber
       case SushiType.tamago:
-        return const Color(0xFFFFF9C4);
+        return const Color(0xFFFFF176); // light yellow
       case SushiType.avocado:
-        return const Color(0xFFA5D6A7);
+        return const Color(0xFF69F0AE); // light lime
       case SushiType.cucumber:
-        return const Color(0xFFB2EBF2);
+        return const Color(0xFF80D8FF); // light sky blue
       case SushiType.cheese:
-        return const Color(0xFFFFE082);
+        return const Color(0xFFD7CCC8); // light beige-caramel
       case SushiType.sausage:
-        return const Color(0xFFCE93D8);
+        return const Color(0xFFB388FF); // light violet
     }
   }
 
