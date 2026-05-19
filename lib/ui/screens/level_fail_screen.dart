@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:sushi_galaxy/core/generators/level_generator.dart';
 import 'package:sushi_galaxy/core/store/game_providers.dart';
 import 'package:sushi_galaxy/services/ads/rewarded_ad_service.dart';
 import 'package:sushi_galaxy/ui/theme/app_theme.dart';
@@ -37,8 +40,36 @@ class LevelFailScreen extends ConsumerStatefulWidget {
 class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
   bool _isWatchingAd = false;
   int _validatedAds = 0;
+  Timer? _refreshTicker;
 
   int get _requiredAdsForContinue => widget.level > 20 ? 2 : 1;
+  bool get _hasSpecialEventNow {
+    final level = LevelGenerator().generate(levelNumber: widget.level);
+    return level.isEvent;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTicker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTicker?.cancel();
+    super.dispose();
+  }
+
+  String _formatDuration(Duration duration) {
+    final totalSeconds = duration.inSeconds < 0 ? 0 : duration.inSeconds;
+    final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
 
   Future<void> _watchAdAndContinue() async {
     if (_isWatchingAd) return;
@@ -116,6 +147,9 @@ class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
   Widget build(BuildContext context) {
     final lives = ref.watch(livesProvider);
     final progress = ref.watch(playerProgressProvider);
+    final hasNoLives = lives.currentLives <= 0;
+    final nextLifeCountdown = lives.timeUntilNextLife ?? Duration.zero;
+    final fullLivesCountdown = lives.timeUntilFullLives;
 
     return Scaffold(
       body: CosmicBackground(
@@ -128,11 +162,17 @@ class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
             ),
           ),
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const Spacer(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                  const SizedBox(height: 8),
 
                   // Emoji + titre
                   Text(
@@ -242,7 +282,7 @@ class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
                     ),
                   ).animate().fadeIn(delay: 600.ms).scale(begin: const Offset(0.8, 0.8)),
 
-                  const Spacer(),
+                  const SizedBox(height: 20),
 
                   // Si visionnage pub en cours
                   if (_isWatchingAd) ...[
@@ -258,11 +298,11 @@ class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
                         children: const [
                           CircularProgressIndicator(color: AppColors.terracotta),
                           SizedBox(height: 16),
-                            Text('📺 Chargement de la video...', style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
+                          Text('📺 Chargement de la video...', style: TextStyle(color: AppColors.textPrimary, fontSize: 16)),
                           SizedBox(height: 6),
-                            Text('La rewarded ad de test va s\'ouvrir en plein ecran',
-                              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                              textAlign: TextAlign.center),
+                          Text('La rewarded ad de test va s\'ouvrir en plein ecran',
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                            textAlign: TextAlign.center),
                         ],
                       ),
                     ),
@@ -276,6 +316,125 @@ class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                    ],
+                  ] else if (hasNoLives) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: AppColors.nebulaPurple.withOpacity(0.65),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: AppColors.error.withOpacity(0.5)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Plus de vies disponibles',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Tu ne peux pas relancer la partie maintenant. Achète des vies en boutique, participe à un événement spécial s\'il est actif, ou attends la recharge automatique.',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 13,
+                              height: 1.35,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Prochaine vie dans ${_formatDuration(nextLifeCountdown)}',
+                            style: const TextStyle(
+                              color: AppColors.goldenRice,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          if (fullLivesCountdown != null) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              'Vies pleines dans ${_formatDuration(fullLivesCountdown)}',
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Une notification te sera envoyée lorsque le stock de vies sera plein.',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ).animate().fadeIn(delay: 780.ms),
+
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        icon: const Text('🛒', style: TextStyle(fontSize: 20)),
+                        label: const Text(
+                          'ALLER EN BOUTIQUE',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.terracotta,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ShopScreen()),
+                          );
+                        },
+                      ),
+                    ).animate().fadeIn(delay: 900.ms),
+
+                    if (_hasSpecialEventNow) ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: OutlinedButton.icon(
+                          icon: const Text('🎉', style: TextStyle(fontSize: 20)),
+                          label: const Text(
+                            'PARTICIPER À L\'ÉVÉNEMENT',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.goldenRice,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppColors.goldenRice, width: 1.4),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const GameScreen()),
+                            );
+                          },
+                        ),
+                      ).animate().fadeIn(delay: 980.ms),
+                    ] else ...[
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Aucun événement spécial actif en ce moment.',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      ).animate().fadeIn(delay: 980.ms),
                     ],
                   ] else ...[
                     // Bouton 1 : RÉESSAYER (perd une vie)
@@ -359,8 +518,12 @@ class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
                   ],
 
                   const SizedBox(height: 20),
-                ],
-              ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),

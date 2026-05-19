@@ -1,8 +1,12 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sushi_galaxy/core/engine/game_engine.dart';
 import 'package:sushi_galaxy/core/generators/level_generator.dart';
 import 'package:sushi_galaxy/core/store/auth_providers.dart';
+import 'package:sushi_galaxy/services/notifications/local_notification_service.dart';
 
 // Game State
 enum GameState {
@@ -419,6 +423,19 @@ class LivesSystem {
 
     return remaining.isNegative ? Duration.zero : remaining;
   }
+
+  Duration? get timeUntilFullLives {
+    if (currentLives >= maxLives) return null;
+    if (lastRechargeAt == null) {
+      return Duration(minutes: rechargeMinutes * (maxLives - currentLives));
+    }
+
+    final nextLife = timeUntilNextLife ?? Duration.zero;
+    final missingLives = maxLives - currentLives;
+    if (missingLives <= 1) return nextLife;
+
+    return nextLife + Duration(minutes: rechargeMinutes * (missingLives - 1));
+  }
 }
 
 final livesProvider = StateNotifierProvider<LivesNotifier, LivesSystem>((ref) {
@@ -433,9 +450,11 @@ final livesProvider = StateNotifierProvider<LivesNotifier, LivesSystem>((ref) {
 class LivesNotifier extends StateNotifier<LivesSystem> {
   LivesNotifier(this._ref) : super(const LivesSystem()) {
     _load();
+    _startTicker();
   }
 
   final Ref _ref;
+  Timer? _ticker;
 
   static const _keyLives = 'lives_current';
   static const _keyMax = 'lives_max';
@@ -461,6 +480,8 @@ class LivesNotifier extends StateNotifier<LivesSystem> {
           ? DateTime.fromMillisecondsSinceEpoch(lastRechargeMs)
           : null,
     );
+            _rechargeFromElapsed();
+            _scheduleFullLivesNotification();
   }
 
   Future<void> _save() async {
@@ -473,47 +494,116 @@ class LivesNotifier extends StateNotifier<LivesSystem> {
         _scopedKey(_keyLastRecharge, prefix),
         state.lastRechargeAt!.millisecondsSinceEpoch,
       );
+    } else {
+      await prefs.remove(_scopedKey(_keyLastRecharge, prefix));
     }
+  }
+
+  void _startTicker() {
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      _rechargeFromElapsed();
+    });
+  }
+
+  void _rechargeFromElapsed() {
+    final anchor = state.lastRechargeAt;
+    if (state.currentLives >= state.maxLives || anchor == null) {
+      return;
+    }
+
+    final rechargeSeconds = Duration(minutes: state.rechargeMinutes).inSeconds;
+    if (rechargeSeconds <= 0) return;
+
+    final elapsedSeconds = DateTime.now().difference(anchor).inSeconds;
+    final livesToAdd = elapsedSeconds ~/ rechargeSeconds;
+
+    if (livesToAdd <= 0) return;
+
+    final updatedLives = min(state.maxLives, state.currentLives + livesToAdd);
+
+    final DateTime? updatedAnchor = updatedLives >= state.maxLives
+        ? null
+        : anchor.add(Duration(seconds: livesToAdd * rechargeSeconds));
+
+    state = state.copyWith(
+      currentLives: updatedLives,
+      lastRechargeAt: updatedAnchor,
+    );
+    _save();
+    _scheduleFullLivesNotification();
+  }
+
+  Future<void> _scheduleFullLivesNotification() async {
+    final notificationsEnabled = _ref.read(settingsProvider).notificationsEnabled;
+
+    if (!notificationsEnabled || state.currentLives >= state.maxLives) {
+      await LocalNotificationService.instance.cancelLivesRefilledNotification();
+      return;
+    }
+
+    final delay = state.timeUntilFullLives;
+    if (delay == null || delay.inSeconds <= 0) {
+      await LocalNotificationService.instance.cancelLivesRefilledNotification();
+      return;
+    }
+
+    await LocalNotificationService.instance.scheduleLivesRefilledNotification(delay);
   }
 
   void useLife() {
     if (state.currentLives > 0) {
+      final newLives = state.currentLives - 1;
+      DateTime? rechargeAnchor = state.lastRechargeAt;
+
+      if (state.currentLives >= state.maxLives || rechargeAnchor == null) {
+        rechargeAnchor = DateTime.now();
+      }
+
       state = state.copyWith(
-        currentLives: state.currentLives - 1,
-        lastRechargeAt: DateTime.now(),
+        currentLives: newLives,
+        lastRechargeAt: rechargeAnchor,
       );
       _save();
+      _scheduleFullLivesNotification();
     }
   }
 
   void addLife() {
     if (state.currentLives < state.maxLives) {
+      final newLives = state.currentLives + 1;
       state = state.copyWith(
-        currentLives: state.currentLives + 1,
-        lastRechargeAt: DateTime.now(),
+        currentLives: newLives,
+        lastRechargeAt: newLives >= state.maxLives ? null : state.lastRechargeAt,
       );
       _save();
+      _scheduleFullLivesNotification();
     }
   }
 
   void refillLives() {
     state = state.copyWith(
       currentLives: state.maxLives,
-      lastRechargeAt: DateTime.now(),
+      lastRechargeAt: null,
     );
     _save();
+    _scheduleFullLivesNotification();
   }
 
   void tick() {
-    final timeUntil = state.timeUntilNextLife;
-    if (timeUntil != null && timeUntil.inMinutes <= 0) {
-      addLife();
-    }
+    _rechargeFromElapsed();
   }
 
   Future<void> resetLives() async {
     state = const LivesSystem();
     await _save();
+    await _scheduleFullLivesNotification();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
   }
 }
 
