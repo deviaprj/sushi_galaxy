@@ -48,28 +48,29 @@ class _LevelFailScreenState extends ConsumerState<LevelFailScreen> {
       _validatedAds = 0;
     });
 
-    var rewardEarned = false;
-    for (int index = 0; index < _requiredAdsForContinue; index++) {
-      rewardEarned = await RewardedAdService.instance.showRewardedAd();
-      if (!mounted) return;
-
-      if (!rewardEarned) {
-        setState(() => _isWatchingAd = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Recompense non validee. Il faut relancer les $_requiredAdsForContinue videos.',
-            ),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-
-      setState(() => _validatedAds = index + 1);
-    }
+    final rewardEarned = await RewardedAdService.instance.showRewardedAdsSequence(
+      count: _requiredAdsForContinue,
+      onAdValidated: (validatedAds, totalAds) {
+        if (!mounted) return;
+        setState(() => _validatedAds = validatedAds);
+      },
+    );
 
     if (!mounted) return;
+
+    if (!rewardEarned) {
+      setState(() => _isWatchingAd = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Recompense non validee. Il faut relancer les $_requiredAdsForContinue videos.',
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isWatchingAd = false);
 
     await showDialog<void>(
