@@ -11,6 +11,7 @@ flutter test                        # Run all tests (34 tests)
 flutter test test/unit/             # Unit tests only
 flutter test test/widgets/          # Widget tests only
 flutter build apk --debug           # Build Android APK
+flutter build appbundle --release   # Build Android release bundle (beta)
 flutter run -d android              # Run on connected device
 ```
 
@@ -27,6 +28,8 @@ flutter run -d android              # Run on connected device
 - `lib/ui/components/effects/glassmorphism.dart` - Glass container effects
 - `lib/ui/components/effects/particle_effects.dart` - Match/confetti particles
 - `lib/services/audio/audio_manager.dart` - Sound effects and adaptive background music
+- `lib/services/ads/rewarded_ad_service.dart` - Rewarded ads + chained rewarded sequence API
+- `lib/services/notifications/local_notification_service.dart` - Local notifications (full lives reminder)
 
 ### Game Engine
 - `GridConfig(rows, cols, sushiTypeCount)` - Fewer sushi types = easier matches
@@ -54,6 +57,38 @@ flutter run -d android              # Run on connected device
 - **Device**: Connected Android device at `6db039ac` (Android 15)
 - **Flutter path**: `/home/geekai/flutter/bin/flutter`
 - **APK location**: `build/app/outputs/flutter-apk/app-debug.apk`
+- **AAB release location**: `build/app/outputs/bundle/release/app-release.aab`
 - **Audio files**: Generated WAV files in `assets/audio/sfx/` and `assets/audio/music/`
 - **SVG assets**: 8 neigloo-style sushi SVGs in `assets/images/sushis/`
 - **GameEngine is nullable**: `_engine` is `GameEngine?` with `_isInitialized` flag; show loading until ready
+
+## Beta Release Readiness
+
+### Must Have Before Beta (P0)
+- Stabiliser tous les flows rewarded ads (succès/échec/interruption/réseau lent).
+- Valider anti-exploit "no lives" sur tous les écrans de relance.
+- Confirmer recharge des vies (app ouverte, fond, relance) + cohérence timers.
+- Vérifier notifications locales "vies pleines" (permission Android 13+, déclenchement unique).
+- Corriger toute erreur audio bloquante Android (`MEDIA_ERROR_UNKNOWN`) et fallback propre.
+- Produire un build `--release` signé et installable en canal bêta fermé.
+
+### Should Have Before Beta (P1)
+- Instrumentation analytics minimale (events gameplay + monétisation).
+- Revue balancing économie (gems, boosters, difficulté).
+- Revalidation UI petites résolutions (overflow, lisibilité, zones tactiles).
+- Tutoriel onboarding court pour nouveaux joueurs.
+
+### Exit Criteria
+- Aucun crash bloquant sur un parcours de jeu complet.
+- Données joueur persistées correctement après redémarrage.
+- Ads/IAP fonctionnels en sandbox, sans faille évidente d'abus.
+- Analyse statique et tests passants.
+
+## Known Issues / Operational Notes
+- `flutter pub get` peut échouer avec un bug advisories cache.
+- Contournement actuel:
+```bash
+rm -f /home/geekai/.pub-cache/hosted/pub.dev/.cache/*-advisories.json
+/home/geekai/flutter/bin/flutter pub get --offline
+```
+- Le device peut refuser une installation APK avec `INSTALL_FAILED_USER_RESTRICTED` si l'utilisateur annule la confirmation Android.
